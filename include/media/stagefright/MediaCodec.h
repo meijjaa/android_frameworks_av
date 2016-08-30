@@ -61,6 +61,9 @@ struct MediaCodec : public AHandler {
         CB_OUTPUT_FORMAT_CHANGED = 4,
         CB_RESOURCE_RECLAIMED = 5,
     };
+    enum {
+        NU_AUDIO_RECONFIG = 1,
+    };
 
     static const pid_t kNoPid = -1;
 
@@ -86,6 +89,10 @@ struct MediaCodec : public AHandler {
             uint32_t flags);
 
     status_t setCallback(const sp<AMessage> &callback);
+
+    // for nuplayerdecoder.
+    void setNuplayerNotify(const sp<AMessage> &notify);
+
 
     status_t setOnFrameRenderedNotification(const sp<AMessage> &notify);
 
@@ -302,6 +309,7 @@ private:
     sp<AMessage> mOutputFormat;
     sp<AMessage> mInputFormat;
     sp<AMessage> mCallback;
+    sp<AMessage> mNuNotify;
     sp<AMessage> mOnFrameRenderedNotification;
     sp<MemoryDealer> mDealer;
 

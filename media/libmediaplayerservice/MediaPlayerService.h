@@ -216,6 +216,7 @@ public:
 
     virtual sp<IMediaPlayer>    create(const sp<IMediaPlayerClient>& client,
                                        audio_session_t audioSessionId);
+    virtual void setMediaPlayerClient(const sp<IMediaPlayerClient>& client);
 
     virtual sp<IMediaCodecList> getCodecList() const;
     virtual sp<IOMX>            getOMX();
@@ -434,6 +435,7 @@ private:
                 SortedVector< wp<MediaRecorderClient> > mMediaRecorderClients;
                 int32_t                     mNextConnId;
                 sp<IOMX>                    mOMX;
+                static sp<IMediaPlayerClient> mNotifyClient;
 };
 
 // ----------------------------------------------------------------------------

@@ -206,14 +206,14 @@ class NuPlayerFactory : public MediaPlayerFactory::IFactory {
     virtual float scoreFactory(const sp<IMediaPlayer>& /*client*/,
                                const sp<IStreamSource>& /*source*/,
                                float /*curScore*/) {
-        return 1.0;
+        return 0.9;
     }
 
     virtual float scoreFactory(const sp<IMediaPlayer>& /*client*/,
                                const sp<DataSource>& /*source*/,
                                float /*curScore*/) {
         // Only NuPlayer supports setting a DataSource source directly.
-        return 1.0;
+        return 0.9;
     }
 
     virtual sp<MediaPlayerBase> createPlayer(pid_t pid) {

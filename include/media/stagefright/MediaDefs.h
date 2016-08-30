@@ -68,6 +68,29 @@ extern const char *MEDIA_MIMETYPE_TEXT_CEA_608;
 extern const char *MEDIA_MIMETYPE_TEXT_CEA_708;
 extern const char *MEDIA_MIMETYPE_DATA_TIMED_ID3;
 
+extern const char *MEDIA_MIMETYPE_VIDEO_VPX;
+extern const char *MEDIA_MIMETYPE_VIDEO_RM10;
+extern const char *MEDIA_MIMETYPE_VIDEO_RM20;
+extern const char *MEDIA_MIMETYPE_VIDEO_RM40;
+extern const char *MEDIA_MIMETYPE_VIDEO_WMV1;
+extern const char *MEDIA_MIMETYPE_VIDEO_WMV2;
+extern const char *MEDIA_MIMETYPE_VIDEO_WMV3;
+extern const char *MEDIA_MIMETYPE_AUDIO_ADPCM_IMA;
+extern const char *MEDIA_MIMETYPE_AUDIO_ADPCM_MS;
+extern const char *MEDIA_MIMETYPE_AUDIO_ALAC;
+extern const char *MEDIA_MIMETYPE_AUDIO_AAC_ADIF;
+extern const char *MEDIA_MIMETYPE_AUDIO_AAC_LATM;
+extern const char *MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE;
+extern const char *MEDIA_MIMETYPE_AUDIO_WMA;
+extern const char *MEDIA_MIMETYPE_AUDIO_WMAPRO;
+extern const char *MEDIA_MIMETYPE_AUDIO_DTSHD;
+extern const char *MEDIA_MIMETYPE_AUDIO_TRUEHD;
+extern const char *MEDIA_MIMETYPE_AUDIO_EC3;
+extern const char *MEDIA_MIMETYPE_AUDIO_APE;
+extern const char *MEDIA_MIMETYPE_AUDIO_FFMPEG;
+extern const char *MEDIA_MIMETYPE_CONTAINER_AIFF;
+extern const char *MEDIA_MIMETYPE_CONTAINER_DDP;
+
 // These are values exported to JAVA API that need to be in sync with
 // frameworks/base/media/java/android/media/AudioFormat.java. Unfortunately,
 // they are not defined in frameworks/av, so defining them here.

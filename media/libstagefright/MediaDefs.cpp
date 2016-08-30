@@ -48,7 +48,6 @@ const char *MEDIA_MIMETYPE_AUDIO_AAC_ADTS = "audio/aac-adts";
 const char *MEDIA_MIMETYPE_AUDIO_MSGSM = "audio/gsm";
 const char *MEDIA_MIMETYPE_AUDIO_AC3 = "audio/ac3";
 const char *MEDIA_MIMETYPE_AUDIO_EAC3 = "audio/eac3";
-
 const char *MEDIA_MIMETYPE_CONTAINER_MPEG4 = "video/mp4";
 const char *MEDIA_MIMETYPE_CONTAINER_WAV = "audio/x-wav";
 const char *MEDIA_MIMETYPE_CONTAINER_OGG = "application/ogg";
@@ -65,5 +64,29 @@ const char *MEDIA_MIMETYPE_TEXT_VTT = "text/vtt";
 const char *MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
 const char *MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 const char *MEDIA_MIMETYPE_DATA_TIMED_ID3 = "application/x-id3v4";
+
+
+const char *MEDIA_MIMETYPE_VIDEO_VPX = "video/x-vnd.on2.vp8";
+const char *MEDIA_MIMETYPE_VIDEO_RM10 = "video/rm10";
+const char *MEDIA_MIMETYPE_VIDEO_RM20 = "video/rm20";
+const char *MEDIA_MIMETYPE_VIDEO_RM40 = "video/rm40";
+const char *MEDIA_MIMETYPE_VIDEO_WMV1 = "video/wmv1";
+const char *MEDIA_MIMETYPE_VIDEO_WMV2 = "video/wmv2";
+const char *MEDIA_MIMETYPE_VIDEO_WMV3 = "video/wmv3";
+const char *MEDIA_MIMETYPE_AUDIO_ADPCM_IMA = "audio/adpcm-ima";
+const char *MEDIA_MIMETYPE_AUDIO_ADPCM_MS = "audio/adpcm-ms";
+const char *MEDIA_MIMETYPE_AUDIO_ALAC = "audio/alac";
+const char *MEDIA_MIMETYPE_AUDIO_AAC_ADIF = "audio/aac-adif";
+const char *MEDIA_MIMETYPE_AUDIO_AAC_LATM = "audio/aac-latm";
+const char *MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE = "audio/adts";
+const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/wma";
+const char *MEDIA_MIMETYPE_AUDIO_WMAPRO = "audio/wmapro";
+const char *MEDIA_MIMETYPE_AUDIO_DTSHD  = "audio/dtshd";
+const char *MEDIA_MIMETYPE_AUDIO_TRUEHD = "audio/truehd";
+const char *MEDIA_MIMETYPE_AUDIO_EC3 = "audio/eac3";
+const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/ape";
+const char *MEDIA_MIMETYPE_AUDIO_FFMPEG = "audio/ffmpeg";
+const char *MEDIA_MIMETYPE_CONTAINER_AIFF = "audio/x-aiff";
+const char *MEDIA_MIMETYPE_CONTAINER_DDP = "audio/ddp";
 
 }  // namespace android
