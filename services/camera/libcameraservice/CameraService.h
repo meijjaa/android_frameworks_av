@@ -92,7 +92,7 @@ public:
 
                         CameraService();
     virtual             ~CameraService();
-
+    void    usbCameraAttach(bool isAttach);
     /////////////////////////////////////////////////////////////////////
     // HAL Callbacks
     virtual void        onDeviceStatusChanged(camera_device_status_t cameraId,
