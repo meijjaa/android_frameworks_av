@@ -41,10 +41,14 @@ HDCP::HDCP(bool createEncryptionModule)
             void *, HDCPModule::ObserverFunc);
 
     CreateHDCPModuleFunc createHDCPModule =
+            (CreateHDCPModuleFunc)dlsym(mLibHandle, "createHDCPModule");
+        // no need to seperate, as we can support encryption and decryption at the same time
+        /*
         mIsEncryptionModule
             ? (CreateHDCPModuleFunc)dlsym(mLibHandle, "createHDCPModule")
             : (CreateHDCPModuleFunc)dlsym(
                     mLibHandle, "createHDCPModuleForDecryption");
+        */
 
     if (createHDCPModule == NULL) {
         ALOGE("Unable to find symbol 'createHDCPModule'.");
@@ -90,6 +94,16 @@ status_t HDCP::initAsync(const char *host, unsigned port) {
     return mHDCPModule->initAsync(host, port);
 }
 
+status_t HDCP::initAsyncRx(unsigned port) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mHDCPModule == NULL) {
+        return NO_INIT;
+    }
+
+    return mHDCPModule->initAsyncRx(port);
+}
+
 status_t HDCP::shutdownAsync() {
     Mutex::Autolock autoLock(mLock);
 
@@ -98,6 +112,16 @@ status_t HDCP::shutdownAsync() {
     }
 
     return mHDCPModule->shutdownAsync();
+}
+
+status_t HDCP::shutdownAsyncRx() {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mHDCPModule == NULL) {
+        return NO_INIT;
+    }
+
+    return mHDCPModule->shutdownAsyncRx();
 }
 
 uint32_t HDCP::getCaps() {
@@ -144,9 +168,11 @@ status_t HDCP::encryptNative(
                     offset, size, streamCTR, outInputCTR, outData);
 }
 
+// This function is commented out due to using static decryption function in libplayer
 status_t HDCP::decrypt(
         const void *inData, size_t size,
         uint32_t streamCTR, uint64_t outInputCTR, void *outData) {
+#if 0
     Mutex::Autolock autoLock(mLock);
 
     CHECK(!mIsEncryptionModule);
@@ -156,6 +182,14 @@ status_t HDCP::decrypt(
     }
 
     return mHDCPModule->decrypt(inData, size, streamCTR, outInputCTR, outData);
+#else
+    (void) inData;
+    (void) size;
+    (void) streamCTR;
+    (void) outInputCTR;
+    (void)outData;
+    return OK;
+#endif
 }
 
 // static
