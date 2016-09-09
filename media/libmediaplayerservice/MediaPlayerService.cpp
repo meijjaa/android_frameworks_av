@@ -324,6 +324,31 @@ sp<IMediaMetadataRetriever> MediaPlayerService::createMetadataRetriever()
 sp<IMediaPlayer> MediaPlayerService::create(const sp<IMediaPlayerClient>& client,
         audio_session_t audioSessionId)
 {
+    if (client == NULL && mClients.size() > 0) {
+        Mutex::Autolock lock(mLock);
+        sp<Client> clt = NULL;
+        ALOGV("[create]mClients.size():%d\n", mClients.size());
+        int32_t connid = 0;
+        for (size_t i = 0; i < mClients.size(); i++) {
+            sp<Client> clttmp = mClients[i].promote();
+            if (clttmp->getPlayer() != NULL) {
+                //ALOGV("[create] mConnId(%d), mPid(%d), mUID(%d) \n", clttmp->mConnId, clttmp->mPid, clttmp->mUID);
+                if (clttmp->mConnId > connid) {
+                    connid = clttmp->mConnId;
+                    clt = clttmp;
+                }
+            }
+        }
+
+        if (clt != NULL) {
+            ALOGV("[create] return clt mConnId(%d), mPid(%d), mUID(%d) \n", clt->mConnId, clt->mPid, clt->mUID);
+        }
+        else {
+            ALOGV("[create] return clt = NULL \n");
+        }
+
+        return clt;
+    }
     pid_t pid = IPCThreadState::self()->getCallingPid();
     int32_t connId = android_atomic_inc(&mNextConnId);
 
@@ -340,6 +365,11 @@ sp<IMediaPlayer> MediaPlayerService::create(const sp<IMediaPlayerClient>& client
         mClients.add(w);
     }
     return c;
+}
+
+sp<IMediaPlayerClient> android::MediaPlayerService::mNotifyClient;
+void MediaPlayerService::setMediaPlayerClient(const sp<IMediaPlayerClient>& client) {
+    mNotifyClient = client;
 }
 
 sp<IMediaCodecList> MediaPlayerService::getCodecList() const {
@@ -617,6 +647,8 @@ void MediaPlayerService::Client::disconnect()
 #endif
         p->reset();
     }
+
+    mNotifyClient = NULL;
 
     disconnectNativeWindow();
 
@@ -1303,6 +1335,11 @@ void MediaPlayerService::Client::notify(
     if (c != NULL) {
         ALOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
         c->notify(msg, ext1, ext2, obj);
+    }
+
+    if (mNotifyClient != NULL) {
+        ALOGV("mNotifyClient->notify (%d, %d, %d)", msg, ext1, ext2);
+        mNotifyClient->notify(msg, ext1, ext2, obj);
     }
 }
 

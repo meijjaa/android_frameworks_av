@@ -43,5 +43,6 @@ int main(int argc __unused, char **argv __unused)
     ResourceManagerService::instantiate();
     registerExtensions();
     ProcessState::self()->startThreadPool();
+    IPCThreadState::self()->disableBackgroundScheduling(true);
     IPCThreadState::self()->joinThreadPool();
 }

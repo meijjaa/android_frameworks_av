@@ -429,6 +429,15 @@ status_t MediaCodec::setCallback(const sp<AMessage> &callback) {
     return PostAndAwaitResponse(msg, &response);
 }
 
+// no status return.
+void MediaCodec::setNuplayerNotify(const sp<AMessage> &notify) {
+    if (mNuNotify != NULL) {
+        return;
+    }
+    mNuNotify = notify;
+}
+
+
 status_t MediaCodec::setOnFrameRenderedNotification(const sp<AMessage> &notify) {
     sp<AMessage> msg = new AMessage(kWhatSetNotification, this);
     msg->setMessage("on-frame-rendered", notify);

@@ -16,6 +16,7 @@ LOCAL_SRC_FILES:=               \
     RemoteDisplay.cpp           \
     StagefrightRecorder.cpp     \
     TestPlayerStub.cpp          \
+    MetadataRetrieverFactory.cpp\
 
 LOCAL_SHARED_LIBRARIES :=       \
     libbinder                   \

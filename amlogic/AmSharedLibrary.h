@@ -13,20 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "Register"
-#include <utils/Log.h>
-#include <cutils/properties.h>
-#include <utils/threads.h>
-#include <utils/KeyedVector.h>
 
-#include "RegisterExtensions.h"
-#include <media/SharedLibrary.h>
-#include <AmSupportModules.h>
+#ifndef SHARED_LIBRARY_H_
+#define SHARED_LIBRARY_H_
 
+#include <utils/RefBase.h>
+#include <utils/String8.h>
+#include <media/stagefright/foundation/ABase.h>
 
-void registerExtensions()
-{
-    android::LoadAndInitAmlogicSupport();
+namespace android {
+    class AmSharedLibrary : public RefBase {
+    public:
+        AmSharedLibrary(const String8 &path);
+        ~AmSharedLibrary();
 
-}
+        bool operator!() const;
+        void *lookup(const char *symbol) const;
+        const char *lastError() const;
 
+    private:
+        void *mLibHandle;
+        DISALLOW_EVIL_CONSTRUCTORS(AmSharedLibrary);
+    };
+};
+
+#endif // SHARED_LIBRARY_H_

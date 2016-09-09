@@ -204,6 +204,19 @@ enum {
                                    // transfer Function, value defined by ColorAspects.Transfer.
     kKeyColorMatrix      = 'cMtx', // int32_t,
                                    // color Matrix, value defined by ColorAspects.MatrixCoeffs.
+   // audio profile
+    kKeyAudioProfile      = 'aprf',  // int32_t
+    kKeyExtraData         = 'exda',
+    kKeyExtraDataSize     = 'edsz',
+    kKeyCodecID           = 'cdid',
+
+    kKeyBlockAlign        = 'bagn',
+    kKeyAudioFlag         ='aufg',  // audio info reported from decoder to indicate special info
+    kKeyDtsDecoderVer     ='dtsV',
+    kKeyDts958Fs          ='dtsF',
+    kKeyDts958PktSize     ='dtsP',
+    kKeyDts958PktType     ='dtsT',
+    kKeyDtsPcmSampsInFrmMaxFs='dtsS',
 };
 
 enum {
