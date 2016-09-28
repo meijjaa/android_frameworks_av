@@ -127,6 +127,10 @@ public:
 
     virtual void close() {};
 
+    static void RegisterSniffer(SnifferFunc func) {
+        return RegisterSniffer_l(func);
+    };
+
 protected:
     virtual ~DataSource() {}
 

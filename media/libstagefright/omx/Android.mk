@@ -32,6 +32,10 @@ LOCAL_SHARED_LIBRARIES :=               \
         libdl
 
 LOCAL_MODULE:= libstagefright_omx
+
+
+include  $(TOP)/frameworks/av/amlogic/config.mk
+
 LOCAL_CFLAGS += -Werror -Wall
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow

@@ -54,6 +54,7 @@
 #include "include/avc_utils.h"
 #include "include/DataConverter.h"
 #include "omx/OMXUtils.h"
+#include "AmMediaDefsExt.h"
 
 namespace android {
 
@@ -1675,6 +1676,28 @@ const char *ACodec::getComponentRole(
             "audio_decoder.ac3", "audio_encoder.ac3" },
         { MEDIA_MIMETYPE_AUDIO_EAC3,
             "audio_decoder.eac3", "audio_encoder.eac3" },
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        { MEDIA_MIMETYPE_VIDEO_MJPEG,
+            "video_decoder.mjpeg", "video_encoder.mjpeg" },
+        { MEDIA_MIMETYPE_VIDEO_VP6,
+            "video_decoder.amvp6", "video_encoder.amvp6" },
+        { MEDIA_MIMETYPE_VIDEO_VP6A,
+            "video_decoder.amvp6a", "video_encoder.amvp6a" },
+        { MEDIA_MIMETYPE_VIDEO_VP6F,
+            "video_decoder.amvp6f", "video_encoder.amvp6f" },
+        { MEDIA_MIMETYPE_VIDEO_HEVC,
+            "video_decoder.amh265", "video_encoder.amh265" },
+        { MEDIA_MIMETYPE_VIDEO_RM10,
+            "video_decoder.rm10", "video_encoder.rm10"},
+        { MEDIA_MIMETYPE_VIDEO_RM20,
+            "video_decoder.rm20", "video_encoder.rm20"},
+        { MEDIA_MIMETYPE_VIDEO_RM40,
+            "video_decoder.rm40", "video_encoder.rm40"},
+        { MEDIA_MIMETYPE_VIDEO_WMV2,
+            "video_decoder.wmv2", "video_encoder.wmv2"},
+        { MEDIA_MIMETYPE_VIDEO_WMV1,
+            "video_decoder.wmv1", "video_encoder.wmv1"},
+#endif
     };
 
     static const size_t kNumMimeToRole =
@@ -3112,6 +3135,17 @@ static const struct VideoCodingMapEntry {
     { MEDIA_MIMETYPE_VIDEO_VP8, OMX_VIDEO_CodingVP8 },
     { MEDIA_MIMETYPE_VIDEO_VP9, OMX_VIDEO_CodingVP9 },
     { MEDIA_MIMETYPE_VIDEO_DOLBY_VISION, OMX_VIDEO_CodingDolbyVision },
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    { MEDIA_MIMETYPE_VIDEO_MJPEG, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingMJPEG) },
+    { MEDIA_MIMETYPE_VIDEO_VP6, OMX_VIDEO_CodingVPX },
+    { MEDIA_MIMETYPE_VIDEO_VP6F, OMX_VIDEO_CodingVPX },
+    { MEDIA_MIMETYPE_VIDEO_VP6A, OMX_VIDEO_CodingVPX },
+    { MEDIA_MIMETYPE_VIDEO_RM10, OMX_VIDEO_CodingRV10},
+    { MEDIA_MIMETYPE_VIDEO_RM20, OMX_VIDEO_CodingRV20},
+    { MEDIA_MIMETYPE_VIDEO_RM40, OMX_VIDEO_CodingRV40},
+    { MEDIA_MIMETYPE_VIDEO_WMV2, OMX_VIDEO_CodingWMV},
+    { MEDIA_MIMETYPE_VIDEO_WMV1, OMX_VIDEO_CodingWMV},
+#endif
 };
 
 static status_t GetVideoCodingTypeFromMime(

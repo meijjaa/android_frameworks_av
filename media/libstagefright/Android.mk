@@ -67,6 +67,7 @@ LOCAL_SRC_FILES:=                         \
 LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/av/include/media/ \
         $(TOP)/frameworks/av/include/media/stagefright/timedtext \
+        $(TOP)/frameworks/av/amlogic/include/media/stagefright \
         $(TOP)/frameworks/native/include/media/hardware \
         $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/external/flac/include \
@@ -129,6 +130,10 @@ LOCAL_CFLAGS += -Wno-multichar -Werror -Wno-error=deprecated-declarations -Wall
 ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))
 LOCAL_CFLAGS += -DENABLE_STAGEFRIGHT_EXPERIMENTS
 endif
+
+
+include  $(TOP)/frameworks/av/amlogic/config.mk
+LOCAL_SHARED_LIBRARIES += libmedia_amlogic_support
 
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow

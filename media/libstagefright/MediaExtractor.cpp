@@ -49,6 +49,11 @@
 #include <utils/String8.h>
 #include <private/android_filesystem_config.h>
 
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+#include <media/amlogic/amExtratorSupport.h>
+#include <media/stagefright/AmMediaDefsExt.h>
+#endif
+
 
 namespace android {
 
@@ -195,19 +200,48 @@ sp<MediaExtractor> MediaExtractor::CreateFromService(
     DataSource::RegisterDefaultSniffers();
 
     sp<AMessage> meta;
-
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    sp<MediaExtractor> extractor;
+    int is_sniff_from_ffmpeg = 0;
+#endif
     String8 tmp;
     if (mime == NULL) {
-        float confidence;
-        if (!source->sniff(&tmp, &confidence, &meta)) {
-            ALOGV("FAILED to autodetect media content.");
+        float confidence = 0;
 
-            return NULL;
+        if (!source->sniff(&tmp, &confidence, &meta)) {
+            confidence = 0;
         }
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        if (confidence < 0.8 ||
+        (!strcmp(tmp.string(), MEDIA_MIMETYPE_AUDIO_WMA)))
+        {
+            float ffconfidence = 0;
+            String8 tmpffmpeg("");
+            sp<AMessage> ffmeta(NULL);
+            if (!sniffFFmpegFormat(source, &tmpffmpeg, &ffconfidence, &ffmeta) && confidence <= 0.0)
+            {
+                ALOGE("FAILED to autodetect media content.");
+                return NULL;
+            } else {
+                if (confidence == 0 ||
+                   ffconfidence > confidence ||
+                   (ffconfidence > 0 && strcmp(tmpffmpeg.string(), tmp.string()))) {
+                    is_sniff_from_ffmpeg = 1;
+                    confidence = ffconfidence;
+                    tmp = tmpffmpeg;
+                }
+            }
+        }
+#else
+    if (confidence == 0) {
+        ALOGE("FAILED to autodetect media content from datasource.");
+        return NULL;
+    }
+#endif
 
         mime = tmp.string();
         ALOGV("Autodetected media content as '%s' with confidence %.2f",
-             mime, confidence);
+              mime, confidence);
     }
 
     bool isDrm = false;
@@ -233,8 +267,19 @@ sp<MediaExtractor> MediaExtractor::CreateFromService(
     }
 
     MediaExtractor *ret = NULL;
-    if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
-            || !strcasecmp(mime, "audio/mp4")) {
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+
+    if (is_sniff_from_ffmpeg) {
+        extractor = createFFmpegExtractor(source, mime);
+        if (extractor != NULL) {
+            ret = extractor.get();
+        }
+    }
+#endif
+    if (ret != NULL) {
+        /**/
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
+               || !strcasecmp(mime, "audio/mp4")) {
         ret = new MPEG4Extractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         ret = new MP3Extractor(source, meta);
@@ -261,7 +306,14 @@ sp<MediaExtractor> MediaExtractor::CreateFromService(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MIDI)) {
         ret = new MidiExtractor(source);
     }
-
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    if (ret == NULL) {
+        extractor = createAmExExtractor(source, mime, meta);
+        if (extractor != NULL) {
+            ret = extractor.get();
+        }
+    }
+#endif
     if (ret != NULL) {
        if (isDrm) {
            ret->setDrmFlag(true);
@@ -269,7 +321,7 @@ sp<MediaExtractor> MediaExtractor::CreateFromService(
            ret->setDrmFlag(false);
        }
     }
-
+    ALOGE("return createAmExExtractor. ret %p\n", ret);
     return ret;
 }
 

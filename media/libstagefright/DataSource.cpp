@@ -50,6 +50,9 @@
 
 #include <private/android_filesystem_config.h>
 
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+#include <media/amlogic/amExtratorSupport.h>
+#endif
 namespace android {
 
 bool DataSource::getUInt16(off64_t offset, uint16_t *x) {
@@ -180,7 +183,9 @@ void DataSource::RegisterDefaultSniffers() {
         RegisterSniffer_l(SniffWVM);
     }
     RegisterSniffer_l(SniffMidi);
-
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    registerAmExExtratorSniffers();
+#endif
     char value[PROPERTY_VALUE_MAX];
     if (property_get("drm.service.enabled", value, NULL)
             && (!strcmp(value, "1") || !strcasecmp(value, "true"))) {
