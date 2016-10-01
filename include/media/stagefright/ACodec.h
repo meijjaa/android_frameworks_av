@@ -164,6 +164,7 @@ private:
         kFlagIsSecure                                 = 1,
         kFlagPushBlankBuffersToNativeWindowOnShutdown = 2,
         kFlagIsGrallocUsageProtected                  = 4,
+        kFlagLowLatencyMode                           = 8,//add by amlogic
     };
 
     enum {
@@ -264,6 +265,7 @@ private:
     Vector<BufferInfo> mBuffers[2];
     bool mPortEOS[2];
     status_t mInputEOSResult;
+    bool mLowLatencyMode;
 
     List<sp<AMessage> > mDeferredQueue;
 

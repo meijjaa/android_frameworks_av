@@ -1035,6 +1035,10 @@ status_t ACodec::configureOutputBuffersFromNativeWindow(
             mNativeWindow.get(), NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS,
             (int *)minUndequeuedBuffers);
 
+    if (mLowLatencyMode) {     //set BufferQueue async mode, add by amlogic for decoder low latency mode
+        mNativeWindow->setSwapInterval(mNativeWindow.get(),0);
+    }
+
     if (err != 0) {
         ALOGE("NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS query failed: %s (%d)",
                 strerror(-err), -err);
@@ -1679,6 +1683,12 @@ const char *ACodec::getComponentRole(
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
         { MEDIA_MIMETYPE_VIDEO_MJPEG,
             "video_decoder.mjpeg", "video_encoder.mjpeg" },
+        { MEDIA_MIMETYPE_VIDEO_WMV3,
+            "video_decoder.wmv3", "video_encoder.wmv3" },
+        { MEDIA_MIMETYPE_VIDEO_VC1,
+            "video_decoder.vc1", "video_encoder.vc1" },
+        { MEDIA_MIMETYPE_VIDEO_WVC1,
+            "video_decoder.vc1", "video_encoder.vc1" },
         { MEDIA_MIMETYPE_VIDEO_VP6,
             "video_decoder.amvp6", "video_encoder.amvp6" },
         { MEDIA_MIMETYPE_VIDEO_VP6A,
@@ -1754,6 +1764,25 @@ status_t ACodec::configureCodec(
 
     if (err != OK) {
         return err;
+    }
+
+    //add by amlogic for decoder low latency mode
+    bool low_latency_mode = false;
+    if (mFlags & kFlagLowLatencyMode) {
+        low_latency_mode = true;
+        mOMX->setParameter(
+                mNode,
+                static_cast<OMX_INDEXTYPE>(OMX_IndexParamLowLatencyMode),
+                &low_latency_mode,
+                sizeof(low_latency_mode));
+    }
+
+    int32_t Is4k_osd = 0;
+    if (msg->findInt32("4k-osd", &Is4k_osd)) {
+        OMX_BOOL enable = (OMX_BOOL)Is4k_osd;
+        err = mOMX->setParameter(
+            mNode, static_cast<OMX_INDEXTYPE>(OMX_IndexParam4kosd),
+                &enable, sizeof(enable));
     }
 
     int32_t bitRate = 0;
@@ -3137,6 +3166,9 @@ static const struct VideoCodingMapEntry {
     { MEDIA_MIMETYPE_VIDEO_DOLBY_VISION, OMX_VIDEO_CodingDolbyVision },
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
     { MEDIA_MIMETYPE_VIDEO_MJPEG, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingMJPEG) },
+    { MEDIA_MIMETYPE_VIDEO_VC1, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVC1) },
+    { MEDIA_MIMETYPE_VIDEO_WVC1, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVC1) },
+    { MEDIA_MIMETYPE_VIDEO_WMV3, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingWMV3) },
     { MEDIA_MIMETYPE_VIDEO_VP6, OMX_VIDEO_CodingVPX },
     { MEDIA_MIMETYPE_VIDEO_VP6F, OMX_VIDEO_CodingVPX },
     { MEDIA_MIMETYPE_VIDEO_VP6A, OMX_VIDEO_CodingVPX },
@@ -6411,6 +6443,13 @@ bool ACodec::UninitializedState::onAllocateComponent(const sp<AMessage> &msg) {
 
         if (!msg->findInt32("encoder", &encoder)) {
             encoder = false;
+        }
+
+        //add by amlogic for decoder low latency mode
+        int32_t lowlatencymode = false;
+        if (msg->findInt32("lowlatencymode", &lowlatencymode)) {
+            if (lowlatencymode)
+                mCodec->mFlags |= kFlagLowLatencyMode;
         }
 
         MediaCodecList::findMatchingCodecs(

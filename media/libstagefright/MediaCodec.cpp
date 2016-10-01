@@ -1770,6 +1770,11 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 mFlags |= kFlagIsEncoder;
             }
 
+            //add by amlogic for decoder low latency mode
+            if (flags & CONFIGURE_FLAG_LOW_LATENCY) {
+                format->setInt32("lowlatencymode", true);
+            }
+
             extractCSD(format);
 
             mCodec->initiateConfigureComponent(format);
