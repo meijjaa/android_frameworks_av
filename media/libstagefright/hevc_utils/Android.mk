@@ -6,7 +6,7 @@ LOCAL_SRC_FILES:=                 \
         HEVC_utils.cpp
 
 LOCAL_C_INCLUDES:= \
-	$(TOP)/external/ffmpeg/ \
+	$(TOP)/vendor/amlogic/external/ffmpeg/ \
 	$(TOP)/frameworks/av/media/libstagefright \
 
 LOCAL_MODULE:= libstagefright_hevcutils
