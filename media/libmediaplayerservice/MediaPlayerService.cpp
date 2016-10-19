@@ -603,7 +603,10 @@ MediaPlayerService::Client::Client(
     mUID = uid;
     mRetransmitEndpointValid = false;
     mAudioAttributes = NULL;
-
+    mURI = NULL;
+    mExit = false;
+    mThreadQuit = true;
+    mSourceReady = -1;
 #if CALLBACK_ANTAGONIZER
     ALOGD("create Antagonizer");
     mAntagonizer = new Antagonizer(notify, this);
@@ -612,11 +615,23 @@ MediaPlayerService::Client::Client(
 
 MediaPlayerService::Client::~Client()
 {
+    {
+        Mutex::Autolock l(mSourceMutex);
+        mExit = true;
+        mSourceCondition.signal();
+    }
+    while (!mThreadQuit) {
+        Mutex::Autolock l(mQuitMutex);
+        mQuitCondition.wait(mQuitMutex);
+    }
     ALOGV("Client(%d) destructor pid = %d", mConnId, mPid);
     mAudioOutput.clear();
     wp<Client> client(this);
     disconnect();
     mService->removeClient(client);
+    if (mURI) {
+        free((void *)mURI);
+    }
     if (mAudioAttributes != NULL) {
         free(mAudioAttributes);
     }
@@ -783,6 +798,17 @@ status_t MediaPlayerService::Client::setDataSource(
         return mStatus;
     } else {
         player_type playerType = MediaPlayerFactory::getPlayerType(this, url);
+        if (playerType == AMNUPLAYER) {
+            mHTTPService = httpService;
+            if (mURI) {
+                free((void *)mURI);
+            }
+            mURI = strdup(url);
+            if (headers) {
+                mHeaders = *headers;
+            }
+            createThreadEtc(playerSwitchTread, this, "switchThread", ANDROID_PRIORITY_DEFAULT);
+        }
         sp<MediaPlayerBase> p = setDataSource_pre(playerType);
         if (p == NULL) {
             return NO_INIT;
@@ -908,7 +934,7 @@ status_t MediaPlayerService::Client::setVideoSurfaceTexture(
     // disconnecting the old one.  Otherwise queue/dequeue calls could be made
     // on the disconnected ANW, which may result in errors.
     status_t err = p->setVideoSurfaceTexture(bufferProducer);
-
+    mSurfaceTexture = bufferProducer;
     disconnectNativeWindow();
 
     mConnectedWindow = anw;
@@ -1013,6 +1039,15 @@ status_t MediaPlayerService::Client::start()
 
 status_t MediaPlayerService::Client::stop()
 {
+    {
+        Mutex::Autolock l(mSourceMutex);
+        mExit = true;
+        mSourceCondition.signal();
+    }
+    while (!mThreadQuit) {
+        Mutex::Autolock l(mQuitMutex);
+        mQuitCondition.wait(mQuitMutex);
+    }
     ALOGV("[%d] stop", mConnId);
     sp<MediaPlayerBase> p = getPlayer();
     if (p == 0) return UNKNOWN_ERROR;
@@ -1144,6 +1179,16 @@ status_t MediaPlayerService::Client::seekTo(int msec)
 
 status_t MediaPlayerService::Client::reset()
 {
+    ALOGI("[%d] call  reset", mConnId);
+    {
+        Mutex::Autolock l(mSourceMutex);
+        mExit = true;
+        mSourceCondition.signal();
+    }
+    while (!mThreadQuit) {
+        Mutex::Autolock l(mQuitMutex);
+        mQuitCondition.wait(mQuitMutex);
+    }
     ALOGV("[%d] reset", mConnId);
     mRetransmitEndpointValid = false;
     sp<MediaPlayerBase> p = getPlayer();
@@ -1332,6 +1377,13 @@ void MediaPlayerService::Client::notify(
         client->addNewMetadataUpdate(metadata_type);
     }
 
+    if (msg == 0xffff) {
+        ALOGI("source ready : %d !", ext1);
+        Mutex::Autolock l(client->mSourceMutex);
+        client->mSourceReady = ext1;
+        (client->mSourceCondition).signal();
+        return;
+    }
     if (c != NULL) {
         ALOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
         c->notify(msg, ext1, ext2, obj);
@@ -1341,6 +1393,76 @@ void MediaPlayerService::Client::notify(
         ALOGV("mNotifyClient->notify (%d, %d, %d)", msg, ext1, ext2);
         mNotifyClient->notify(msg, ext1, ext2, obj);
     }
+}
+
+// static
+int MediaPlayerService::Client::playerSwitchTread(void * arg)
+{
+    Client * p = (Client *)arg;
+    return p->createAnotherPlayer();
+}
+
+int MediaPlayerService::Client::createAnotherPlayer()
+{
+
+    mThreadQuit = false;
+    sp<MediaPlayerBase> p;
+    status_t ret;
+    player_type new_type;
+    while (mSourceReady < 0) {
+        Mutex::Autolock l(mSourceMutex);
+        if (mExit) {
+            break;
+        }
+        mSourceCondition.wait(mSourceMutex);
+    }
+    if (mSourceReady <= 0 || mExit) {
+        goto QUIT;
+    }
+
+    new_type = AMSUPER_PLAYER;
+    p = MediaPlayerFactory::createPlayer(new_type, this, notify, mPid);
+
+    if (p.get() == NULL) {
+        notify(this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, -1, NULL);
+        goto QUIT;
+    }
+    {
+        Mutex::Autolock l(mLock);
+        mPlayer->reset();
+        mPlayer.clear();
+        mPlayer = NULL;
+    }
+    if (!p->hardwareOutput()) {
+        static_cast<MediaPlayerInterface*>(p.get())->setAudioSink(mAudioOutput);
+    }
+    ret = p->setDataSource(mHTTPService, mURI, &mHeaders);
+    mStatus = ret;
+    if (mRetransmitEndpointValid) {
+        mStatus = p->setRetransmitEndpoint(&mRetransmitEndpoint);
+    }
+    if (ret != OK) {
+        p->reset();
+        p.clear();
+        notify(this, MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, -1, NULL);
+        goto QUIT;
+    }
+    p->prepareAsync();
+    if (mSurfaceTexture != NULL) {
+        p->setVideoSurfaceTexture(mSurfaceTexture);
+    }
+    {
+        Mutex::Autolock l(mLock);
+        mPlayer = p;
+    }
+
+QUIT:
+    Mutex::Autolock l(mQuitMutex);
+    mThreadQuit = true;
+    mQuitCondition.signal();
+    ALOGI("[%s:%d] end create new player!", __FUNCTION__, __LINE__);
+
+    return 0;
 }
 
 
