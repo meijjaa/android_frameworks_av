@@ -647,8 +647,7 @@ void MediaPlayerService::Client::disconnect()
 #endif
         p->reset();
     }
-
-    mNotifyClient = NULL;
+    //mNotifyClient = NULL;
 
     disconnectNativeWindow();
 
