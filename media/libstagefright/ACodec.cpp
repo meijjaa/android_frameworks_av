@@ -1681,6 +1681,8 @@ const char *ACodec::getComponentRole(
         { MEDIA_MIMETYPE_AUDIO_EAC3,
             "audio_decoder.eac3", "audio_encoder.eac3" },
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        {MEDIA_MIMETYPE_AUDIO_DTSHD,
+            "audio_decoder.dtshd",  "audio_encoder.dtshd" },
         { MEDIA_MIMETYPE_VIDEO_MJPEG,
             "video_decoder.mjpeg", "video_encoder.mjpeg" },
         { MEDIA_MIMETYPE_VIDEO_WMV3,
@@ -2298,7 +2300,21 @@ status_t ACodec::configureCodec(
             err = setupEAC3Codec(encoder, numChannels, sampleRate);
         }
     }
+//add by amlogic for dts audio support
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_DTSHD)) {
+        int32_t numChannels;
+        int32_t sampleRate;
+        if (!msg->findInt32("channel-count", &numChannels)
+                || !msg->findInt32("sample-rate", &sampleRate)) {
+            ALOGE("DTS has invalid parameters!");
+            err = INVALID_OPERATION;
+        } else {
 
+            err = setupDTSCodec(encoder, numChannels, sampleRate);
+        }
+    }
+#endif
     if (err != OK) {
         return err;
     }
@@ -2810,6 +2826,45 @@ status_t ACodec::setupEAC3Codec(
             sizeof(def));
 }
 
+//add by amlogic for dts audio support
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+status_t ACodec::setupDTSCodec(
+        bool encoder, int32_t numChannels, int32_t sampleRate) {
+    status_t err = setupRawAudioFormat(
+            encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
+
+    if (err != OK) {
+        return err;
+    }
+    if (encoder) {
+        ALOGW("DTS encoding is not supported.");
+        return INVALID_OPERATION;
+    }
+
+    OMX_AUDIO_PARAM_ANDROID_DTSHDTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexInput;
+
+    err = mOMX->getParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidDtshd,
+            &def,
+            sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.nChannels = numChannels;
+    def.nSamplesPerSec = sampleRate;
+    def.bExtendFormat = (OMX_BOOL)0;
+    return mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidDtshd,
+            &def,
+            sizeof(def));
+}
+#endif
 static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(
         bool isAMRWB, int32_t bps) {
     if (isAMRWB) {
@@ -5123,7 +5178,31 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                     notify->setInt32("sample-rate", params.nSampleRate);
                     break;
                 }
+//add by amlogic for dts audio support
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+                case OMX_AUDIO_CodingAndroidDTSHD:/*DTS PRIVATE ?*/
+                {
+                    OMX_AUDIO_PARAM_ANDROID_DTSHDTYPE params;
+                    InitOMXParams(&params);
+                    params.nPortIndex = portIndex;
 
+                    err = mOMX->getParameter(
+                            mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidDtshd,
+                            &params, sizeof(params));
+                    if (err != OK) {
+                        ALOGE("OMX_AUDIO_CodingAndroidDTSHD OMX_IndexParamAudioAndroidDtshd %d\n",
+                                    err);
+                        return err;
+                    }
+
+                    ALOGI("OMX_AUDIO_CodingAndroidDTSHD channel-count %d, sample-rate %d\n",
+                                params.nChannels, params.nSamplesPerSec);
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_DTSHD);
+                    notify->setInt32("channel-count", params.nChannels);
+                    notify->setInt32("sample-rate", params.nSamplesPerSec);
+                    break;
+                }
+#endif
                 case OMX_AUDIO_CodingAndroidOPUS:
                 {
                     OMX_AUDIO_PARAM_ANDROID_OPUSTYPE params;

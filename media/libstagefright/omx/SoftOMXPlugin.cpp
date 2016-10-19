@@ -53,6 +53,9 @@ static const struct {
     { "OMX.google.rm40.decoder", "amsoftdec", "video_decoder.rm" },
     { "OMX.google.wmv2.decoder", "amsoftdec", "video_decoder.wmv2" },
     { "OMX.google.wmv1.decoder", "amsoftdec", "video_decoder.wmv1" },
+    { "OMX.google.ac3.decoder", "dcvdec", "audio_decoder.ac3" },
+    { "OMX.google.ec3.decoder", "dcvdec", "audio_decoder.ec3" },
+    { "OMX.google.dtshd.decoder", "dtshd", "audio_decoder.dtshd"},
 #else
     { "OMX.google.vp8.decoder", "vpxdec", "video_decoder.vp8" },
 #endif
