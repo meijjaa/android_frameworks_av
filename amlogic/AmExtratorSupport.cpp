@@ -112,7 +112,7 @@ static void loadAmlogicExtratorAdapters(void)
 int registerAmExExtratorSniffers(void)
 {
     typedef int (*registerExSniffs_t)(void);
-    registerExSniffs_t registerExSniffs;
+    registerExSniffs_t registerExSniffs = NULL;
     static int registered = 0;
     if (registered) {
         return 0;
