@@ -1681,8 +1681,17 @@ const char *ACodec::getComponentRole(
         { MEDIA_MIMETYPE_AUDIO_EAC3,
             "audio_decoder.eac3", "audio_encoder.eac3" },
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+//added for more audio type support
         {MEDIA_MIMETYPE_AUDIO_DTSHD,
             "audio_decoder.dtshd",  "audio_encoder.dtshd" },
+        { MEDIA_MIMETYPE_AUDIO_AAC_ADIF,
+            "audio_decoder.adif", "audio_encoder.adif" },
+        { MEDIA_MIMETYPE_AUDIO_AAC_LATM,
+            "audio_decoder.latm", "audio_encoder.latm" },
+        { MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE,
+            "audio_decoder.adts", "audio_encoder.adts" },
+        { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II,
+            "audio_decoder.mp2", "audio_encoder.mp2" },
         { MEDIA_MIMETYPE_VIDEO_MJPEG,
             "video_decoder.mjpeg", "video_encoder.mjpeg" },
         { MEDIA_MIMETYPE_VIDEO_WMV3,
@@ -2170,7 +2179,11 @@ status_t ACodec::configureCodec(
                     sampleRate,
                     numChannels);
         }
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADIF)
+#endif
+    ) {
         int32_t numChannels, sampleRate;
         if (!msg->findInt32("channel-count", &numChannels)
                 || !msg->findInt32("sample-rate", &sampleRate)) {
