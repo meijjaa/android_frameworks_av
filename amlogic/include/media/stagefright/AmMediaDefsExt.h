@@ -38,6 +38,7 @@ extern const char *MEDIA_MIMETYPE_VIDEO_HEVC;
 extern const char *MEDIA_MIMETYPE_VIDEO_VPX;
 extern const char *MEDIA_MIMETYPE_VIDEO_RM10;
 extern const char *MEDIA_MIMETYPE_VIDEO_RM20;
+extern const char *MEDIA_MIMETYPE_VIDEO_RM30;
 extern const char *MEDIA_MIMETYPE_VIDEO_RM40;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV1;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV2;

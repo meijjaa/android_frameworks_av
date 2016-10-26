@@ -679,7 +679,23 @@ status_t convertMetaDataToMessage(
                 && type == 'hdrS' && size == sizeof(HDRStaticInfo)) {
             ColorUtils::setHDRStaticInfoIntoFormat(*(HDRStaticInfo*)data, msg);
         }
-
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        const void *extradata;
+        int32_t extradata_size;
+        if (meta->findData(kKeyExtraData, &type, &extradata, &size)
+                && meta->findInt32(kKeyExtraDataSize,&extradata_size)) {
+            msg->setInt32("extradata-size", extradata_size);
+            const uint8_t *ptr = (const uint8_t *)extradata;
+            sp<ABuffer> buffer = new (std::nothrow) ABuffer(1024);
+            if (buffer.get() == NULL || buffer->base() == NULL) {
+                return NO_MEMORY;
+            }
+            buffer->setRange(0, 0);
+            memcpy(buffer->data(), ptr, extradata_size);
+            buffer->setRange(buffer->offset(), extradata_size);
+            msg->setBuffer("extra-data", buffer);
+        }
+#endif
         convertMetaDataToMessageColorAspects(meta, msg);
     } else if (!strncasecmp("audio/", mime, 6)) {
         int32_t numChannels, sampleRate;

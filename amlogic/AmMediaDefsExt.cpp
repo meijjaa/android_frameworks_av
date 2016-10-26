@@ -34,6 +34,7 @@ const char *MEDIA_MIMETYPE_VIDEO_WVC1 = "video/wvc1";
 const char *MEDIA_MIMETYPE_VIDEO_VPX = "video/x-vnd.on2.vp8";
 const char *MEDIA_MIMETYPE_VIDEO_RM10 = "video/rm10";
 const char *MEDIA_MIMETYPE_VIDEO_RM20 = "video/rm20";
+const char *MEDIA_MIMETYPE_VIDEO_RM30 = "video/rm30";
 const char *MEDIA_MIMETYPE_VIDEO_RM40 = "video/rm40";
 const char *MEDIA_MIMETYPE_VIDEO_VP6 = "video/x-vnd.on2.vp6";
 const char *MEDIA_MIMETYPE_VIDEO_VP6F = "video/x-vnd.on2.vp6f";

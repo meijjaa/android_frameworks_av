@@ -3310,6 +3310,36 @@ status_t ACodec::setupVideoDecoder(
         mIsLegacyVP9Decoder = err != OK;
     }
 
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    if ((compressionFormat == OMX_VIDEO_CodingWMV)
+        ||(compressionFormat == OMX_VIDEO_CodingRV10)
+        ||(compressionFormat == OMX_VIDEO_CodingRV20)) {
+
+        int32_t extradata_size;
+        status_t err;
+        sp<ABuffer> extrabuf;
+        if (msg->findBuffer("extra-data", &extrabuf)
+                &&msg->findInt32("extradata-size", &extradata_size)) {
+            if (extradata_size < 128) {
+                OMX_VIDEO_INFO video_info;
+                InitOMXParams(&video_info);
+                video_info.nPortIndex     = kPortIndexInput;
+                video_info.nExtraDataSize = extradata_size;
+                video_info.width = width;
+                video_info.height = height;
+                memcpy(video_info.mExtraData , extrabuf->data(), extradata_size);
+                err = mOMX->setParameter(mNode, OMX_IndexParamVideoInfo, &video_info, sizeof(video_info));
+
+                if (err != OK) {
+                    ALOGE("setParameter('OMX_IndexParamVideoInfo') failed (err = %d)", err);
+                }
+            } else {
+                ALOGE("extra data too long");
+            }
+
+        }
+    }
+#endif
     err = setVideoPortFormatType(
             kPortIndexInput, compressionFormat, OMX_COLOR_FormatUnused);
 
