@@ -296,7 +296,7 @@ CameraService::~CameraService() {
     gCameraService = nullptr;
 }
 
-void CameraService::usbCameraAttach(bool isAttach){
+Status CameraService::usbCameraAttach(bool isAttach){
     mNumberOfCameras = mModule->getNumberOfCameras();
     mNumberOfNormalCameras = mNumberOfCameras;
 
@@ -322,7 +322,8 @@ void CameraService::usbCameraAttach(bool isAttach){
             if (checkCameraCapabilities(i, info, &latestStrangeCameraId) != OK) {
                 delete mModule;
                 mModule = nullptr;
-                return;
+                return STATUS_ERROR(ERROR_INVALID_OPERATION,
+                    "CameraId is not valid");;
             }
         }
         // Defaults to use for cost and conflicting devices
@@ -359,11 +360,12 @@ void CameraService::usbCameraAttach(bool isAttach){
         CameraService::pingCameraServiceProxy();
     }
 
-    //if (mNumberOfCameras == 0) {
-    //    mModule->setCameraInfo(0, false);
-    //}
+    if (mNumberOfCameras == 0) {
+        mModule->setCameraInfo(0, false);
+    }
 
     ALOGI("USB camera attach isAttach:%d, number:%d", isAttach, mNumberOfCameras);
+    return Status::ok();
 }
 
 void CameraService::onDeviceStatusChanged(camera_device_status_t  cameraId,

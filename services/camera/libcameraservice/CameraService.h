@@ -92,7 +92,7 @@ public:
 
                         CameraService();
     virtual             ~CameraService();
-    void    usbCameraAttach(bool isAttach);
+
     /////////////////////////////////////////////////////////////////////
     // HAL Callbacks
     virtual void        onDeviceStatusChanged(camera_device_status_t cameraId,
@@ -133,7 +133,7 @@ public:
     virtual binder::Status    addListener(const sp<hardware::ICameraServiceListener>& listener);
     virtual binder::Status    removeListener(
             const sp<hardware::ICameraServiceListener>& listener);
-
+    virtual binder::Status    usbCameraAttach(bool isAttach);
     virtual binder::Status    getLegacyParameters(
             int32_t cameraId,
             /*out*/
