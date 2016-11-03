@@ -64,6 +64,9 @@ private:
     Vector<int64_t> mBufferTimestamps;
 
     CDrcPresModeWrapper mDrcWrap;
+    bool mSbrChanged;
+    uint8_t  mSfIndex;
+    UCHAR* mInBuffer[2];
 
     enum {
         NONE,
@@ -74,6 +77,7 @@ private:
     void initPorts();
     status_t initDecoder();
     bool isConfigured() const;
+    void configureDownmix() const;
     void drainDecoder();
 
 //      delay compensation
