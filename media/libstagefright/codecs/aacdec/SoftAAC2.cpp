@@ -617,7 +617,7 @@ void SoftAAC2::onQueueFilled(OMX_U32 /* portIndex */) {
                 notifyEmptyBufferDone(inHeader);
                 inHeader = NULL;
 
-                configureDownmix();
+                //configureDownmix();
                 // Only send out port settings changed event if both sample rate
                 // and numChannels are valid.
                 if (mStreamInfo->sampleRate && mStreamInfo->numChannels) {
@@ -664,7 +664,7 @@ void SoftAAC2::onQueueFilled(OMX_U32 /* portIndex */) {
                 inInfo = NULL;
                 notifyEmptyBufferDone(inHeader);
                 inHeader = NULL;
-                configureDownmix();
+                //configureDownmix();
                 // Only send out port settings changed event if both sample rate
                 // and numChannels are valid.
                 if (mStreamInfo->sampleRate && mStreamInfo->numChannels) {
