@@ -1412,7 +1412,11 @@ bool SniffMatroska(
     }
 
     mimeType->setTo(MEDIA_MIMETYPE_CONTAINER_MATROSKA);
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    *confidence = 0.01;
+#else
     *confidence = 0.6;
+#endif
 
     return true;
 }

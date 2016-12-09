@@ -9,6 +9,8 @@ LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/frameworks/av/media/libstagefright/include \
 
+include  $(TOP)/frameworks/av/amlogic/config.mk
+
 LOCAL_CFLAGS += -Wno-multichar -Werror -Wall
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow

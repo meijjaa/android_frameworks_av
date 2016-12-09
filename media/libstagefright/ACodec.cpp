@@ -1724,6 +1724,8 @@ const char *ACodec::getComponentRole(
             "video_decoder.wmv2", "video_encoder.wmv2"},
         { MEDIA_MIMETYPE_VIDEO_WMV1,
             "video_decoder.wmv1", "video_encoder.wmv1"},
+       { MEDIA_MIMETYPE_AUDIO_FFMPEG,
+            "audio_decoder.ffmpeg", "audio_encoder.ffmpeg" },
 #endif
     };
 
@@ -2356,6 +2358,22 @@ status_t ACodec::configureCodec(
         } else {
 
             err = setupTRUEHDCodec(encoder, numChannels, sampleRate);
+        }
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FFMPEG)) {
+         int32_t sampleRate, numChannels, extradataSize, bitRate, blockAlign, codecId;
+         sp<ABuffer> extraBuf;
+        if (!msg->findInt32("channel-count", &numChannels)
+                || !msg->findInt32("sample-rate", &sampleRate)
+                || !msg->findInt32("bit-rate", &bitRate)
+                || !msg->findInt32("block-align", &blockAlign)
+                || !msg->findInt32("codec-id", &codecId)
+                || !msg->findInt32("extradata-size", &extradataSize)
+                || !msg->findBuffer("extra-data", &extraBuf)) {
+            ALOGE("ffmpeg audio has invalid parameters!");
+            err = INVALID_OPERATION;
+        } else {
+            err = setupFFmpegCodec(encoder, numChannels, sampleRate, bitRate,
+                                   blockAlign, codecId, extradataSize, extraBuf);
         }
     }
 #endif
@@ -3076,6 +3094,41 @@ status_t ACodec::setupWMACodec(int32_t sampleRate, int32_t numChannels , int32_t
       return OK;
 }
 
+status_t ACodec::setupFFmpegCodec(
+        bool encoder, int32_t numChannels, int32_t sampleRate,
+        int32_t bitRate, int32_t blockAlign, int32_t codecId,
+        int32_t extradataSize, sp<ABuffer> extraBuf) {
+    status_t err = OK;
+    if (encoder) {
+        ALOGW("ffmpeg encoding is not supported.");
+        return INVALID_OPERATION;
+    }
+    int ffmpeg_info_size = sizeof(OMX_AUDIO_PARAM_FFMPEGTYPE) + extradataSize;
+    OMX_AUDIO_PARAM_FFMPEGTYPE *ffmpeg_info = (OMX_AUDIO_PARAM_FFMPEGTYPE *)malloc(ffmpeg_info_size);
+    InitOMXParams(ffmpeg_info);
+    ffmpeg_info->nSize = ffmpeg_info_size;
+    ffmpeg_info->nPortIndex      = kPortIndexInput;
+    ffmpeg_info->nChannels       = numChannels;
+    ffmpeg_info->nBitRate        = bitRate;
+    ffmpeg_info->nSamplingRate   = sampleRate;
+    ffmpeg_info->nBlockAlign     = blockAlign;
+    ffmpeg_info->nCodecID        = codecId;
+    ffmpeg_info->nExtraData_Size = extradataSize;
+    if (extradataSize > 0) {
+        if (extradataSize < 10*1024) {
+            memcpy(ffmpeg_info->nExtraData , extraBuf->data(), extradataSize);
+        } else {
+            ALOGE("extra data too long");
+        }
+    }
+    err = mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioFFmpeg,
+            ffmpeg_info,
+            ffmpeg_info_size);
+    free(ffmpeg_info);
+    return err;
+}
 #endif
 static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(
         bool isAMRWB, int32_t bps) {
@@ -5607,6 +5660,23 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                     notify->setString("mime", MEDIA_MIMETYPE_AUDIO_WMA);
                     notify->setInt32("channel-count", params.nChannels);
                     notify->setInt32("sample-rate", params.nSampleRate);
+                    break;
+                }
+                case OMX_AUDIO_CodingFFMPEG:
+                {
+                    OMX_AUDIO_PARAM_PCMMODETYPE params;
+                    InitOMXParams(&params);
+                    params.nPortIndex = portIndex;
+
+                    err = mOMX->getParameter(
+                                mNode, OMX_IndexParamAudioPcm, &params, sizeof(params));
+                    if (err != OK) {
+                        return err;
+                    }
+
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_FFMPEG);
+                    notify->setInt32("channel-count", params.nChannels);
+                    notify->setInt32("sample-rate", params.nSamplingRate);
                     break;
                 }
 #endif

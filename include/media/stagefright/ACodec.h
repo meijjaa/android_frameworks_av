@@ -474,6 +474,11 @@ private:
 //add by amlogic for wma audio support
     status_t setupWMACodec(int32_t sampleRate, int32_t numChannels , int32_t bitRate,
                                      int32_t codec_id,  int32_t block_align,char* extradata,int32_t extradata_size);
+//add by amlogic for ffmpeg audio support
+    status_t setupFFmpegCodec(
+        bool encoder, int32_t numChannels, int32_t sampleRate,
+        int32_t bitRate, int32_t blockAlign, int32_t codecId,
+        int32_t extradataSize, sp<ABuffer> extraBuf);
     status_t selectAudioPortFormat(
             OMX_U32 portIndex, OMX_AUDIO_CODINGTYPE desiredFormat);
 
