@@ -188,6 +188,8 @@ AACExtractor::AACExtractor(
         mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
         duration = numFrames * mFrameDurationUs;
         mMeta->setInt64(kKeyDuration, duration);
+        //add by amlogic, we have remain adts header below
+        mMeta->setInt32(kKeyIsADTS, true);
     }
 
     mInitCheck = OK;
@@ -309,9 +311,9 @@ status_t AACSource::read(
     if (err != OK) {
         return err;
     }
-
-    frameSizeWithoutHeader = frameSize - headerSize;
-    if (mDataSource->readAt(mOffset + headerSize, buffer->data(),
+    // add by amlogic ,remain adts head is easy for decoding
+    frameSizeWithoutHeader = frameSize; //- headerSize;
+    if (mDataSource->readAt(mOffset/* + headerSize*/, buffer->data(),
                 frameSizeWithoutHeader) != (ssize_t)frameSizeWithoutHeader) {
         buffer->release();
         buffer = NULL;
