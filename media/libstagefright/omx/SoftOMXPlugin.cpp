@@ -46,7 +46,6 @@ static const struct {
     { "OMX.google.vp6a.decoder", "amsoftdec", "video_decoder.amvp6a" },
     { "OMX.google.vp6f.decoder", "amsoftdec", "video_decoder.amvp6f" },
     { "OMX.google.vp8.decoder", "amsoftdec", "video_decoder.vp8" },
-    { "OMX.google.h265.decoder", "amh265dec", "video_decoder.amh265" },
     { "OMX.google.h264.decoder", "amsoftdec", "video_decoder.avc" },
     { "OMX.google.rm10.decoder", "amsoftdec", "video_decoder.rm" },
     { "OMX.google.rm20.decoder", "amsoftdec", "video_decoder.rm" },
