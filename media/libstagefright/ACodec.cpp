@@ -3237,14 +3237,14 @@ static const struct VideoCodingMapEntry {
     { MEDIA_MIMETYPE_VIDEO_VC1, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVC1) },
     { MEDIA_MIMETYPE_VIDEO_WVC1, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVC1) },
     { MEDIA_MIMETYPE_VIDEO_WMV3, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingWMV3) },
-    { MEDIA_MIMETYPE_VIDEO_VP6, OMX_VIDEO_CodingVPX },
-    { MEDIA_MIMETYPE_VIDEO_VP6F, OMX_VIDEO_CodingVPX },
-    { MEDIA_MIMETYPE_VIDEO_VP6A, OMX_VIDEO_CodingVPX },
-    { MEDIA_MIMETYPE_VIDEO_RM10, OMX_VIDEO_CodingRV10},
-    { MEDIA_MIMETYPE_VIDEO_RM20, OMX_VIDEO_CodingRV20},
-    { MEDIA_MIMETYPE_VIDEO_RM40, OMX_VIDEO_CodingRV40},
-    { MEDIA_MIMETYPE_VIDEO_WMV2, OMX_VIDEO_CodingWMV},
-    { MEDIA_MIMETYPE_VIDEO_WMV1, OMX_VIDEO_CodingWMV},
+    { MEDIA_MIMETYPE_VIDEO_VP6, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVPX) },
+    { MEDIA_MIMETYPE_VIDEO_VP6F, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVPX) },
+    { MEDIA_MIMETYPE_VIDEO_VP6A, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingVPX) },
+    { MEDIA_MIMETYPE_VIDEO_RM10, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingRV10) },
+    { MEDIA_MIMETYPE_VIDEO_RM20, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingRV20) },
+    { MEDIA_MIMETYPE_VIDEO_RM40, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingRV40) },
+    { MEDIA_MIMETYPE_VIDEO_WMV2, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingWMV) },
+    { MEDIA_MIMETYPE_VIDEO_WMV1, static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingWMV) },
 #endif
 };
 
@@ -3311,9 +3311,9 @@ status_t ACodec::setupVideoDecoder(
     }
 
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
-    if ((compressionFormat == OMX_VIDEO_CodingWMV)
-        ||(compressionFormat == OMX_VIDEO_CodingRV10)
-        ||(compressionFormat == OMX_VIDEO_CodingRV20)) {
+    if ((compressionFormat == static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingWMV))
+        ||(compressionFormat == static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingRV10))
+        ||(compressionFormat == static_cast<OMX_VIDEO_CODINGTYPE>(OMX_VIDEO_CodingRV20))) {
 
         int32_t extradata_size;
         status_t err;
