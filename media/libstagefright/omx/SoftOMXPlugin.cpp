@@ -60,9 +60,8 @@ static const struct {
     { "OMX.google.adts.decoder", "adtsdec", "audio_decoder.adts" },
     { "OMX.google.latm.decoder", "latmdec", "audio_decoder.latm" },
     { "OMX.google.mp2.decoder", "mp2dec", "audio_decoder.mp2" },
-#else
-    { "OMX.google.vp8.decoder", "vpxdec", "video_decoder.vp8" },
 #endif
+    { "OMX.google.vp8.decoder", "vpxdec", "video_decoder.vp8" },
     { "OMX.google.h264.encoder", "avcenc", "video_encoder.avc" },
     { "OMX.google.hevc.decoder", "hevcdec", "video_decoder.hevc" },
     { "OMX.google.g711.alaw.decoder", "g711dec", "audio_decoder.g711alaw" },
@@ -107,9 +106,11 @@ OMX_ERRORTYPE SoftOMXPlugin::makeComponentInstance(
         void *libHandle = dlopen(libName.c_str(), RTLD_NOW);
 
         if (libHandle == NULL) {
-            ALOGE("unable to dlopen %s: %s", libName.c_str(), dlerror());
-
-            return OMX_ErrorComponentNotFound;
+            /*support muti-component support same format.
+            for vp8 decoder.
+            */
+            ALOGE("unable to dlopen %s: %s, try next.\n", libName.c_str(), dlerror());
+            continue;
         }
 
         typedef SoftOMXComponent *(*CreateSoftOMXComponentFunc)(
