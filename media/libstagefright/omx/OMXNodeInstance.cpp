@@ -432,7 +432,7 @@ bool OMXNodeInstance::isProhibitedIndex_l(OMX_INDEXTYPE index) {
             || (index > (OMX_INDEXTYPE)OMX_IndexExtAudioStartUnused
                     && index <= (OMX_INDEXTYPE)OMX_IndexParamAudioProfileQuerySupported)
             || (index > (OMX_INDEXTYPE)OMX_IndexExtVideoStartUnused
-                    && index <= (OMX_INDEXTYPE)OMX_IndexConfigAndroidIntraRefresh)
+                    && index <= (OMX_INDEXTYPE)OMX_IndexConfigAndroidVideoTemporalLayering)
             || (index > (OMX_INDEXTYPE)OMX_IndexExtOtherStartUnused
                     && index <= (OMX_INDEXTYPE)OMX_IndexParamConsumerUsageBits)) {
         return false;
@@ -1587,6 +1587,7 @@ inline static const char *asString(IOMX::InternalOptionType i, const char *def =
         case IOMX::INTERNAL_OPTION_MAX_FPS:           return "MAX_FPS";
         case IOMX::INTERNAL_OPTION_START_TIME:        return "START_TIME";
         case IOMX::INTERNAL_OPTION_TIME_LAPSE:        return "TIME_LAPSE";
+        case IOMX::INTERNAL_OPTION_TIME_OFFSET:       return "TIME_OFFSET";
         default:                                      return def;
     }
 }
@@ -1615,6 +1616,7 @@ status_t OMXNodeInstance::setInternalOption(
         case IOMX::INTERNAL_OPTION_MAX_FPS:
         case IOMX::INTERNAL_OPTION_START_TIME:
         case IOMX::INTERNAL_OPTION_TIME_LAPSE:
+        case IOMX::INTERNAL_OPTION_TIME_OFFSET:
         case IOMX::INTERNAL_OPTION_COLOR_ASPECTS:
         {
             const sp<GraphicBufferSource> &bufferSource =
@@ -1641,6 +1643,13 @@ status_t OMXNodeInstance::setInternalOption(
 
                 CLOG_CONFIG(setInternalOption, "delayUs=%lld", (long long)delayUs);
                 return bufferSource->setRepeatPreviousFrameDelayUs(delayUs);
+            } else if (type == IOMX::INTERNAL_OPTION_TIME_OFFSET) {
+                int64_t timeOffsetUs;
+                if (!getInternalOption(data, size, &timeOffsetUs)) {
+                    return INVALID_OPERATION;
+                }
+                CLOG_CONFIG(setInternalOption, "bufferOffsetUs=%lld", (long long)timeOffsetUs);
+                return bufferSource->setInputBufferTimeOffset(timeOffsetUs);
             } else if (type == IOMX::INTERNAL_OPTION_MAX_TIMESTAMP_GAP) {
                 int64_t maxGapUs;
                 if (!getInternalOption(data, size, &maxGapUs)) {
