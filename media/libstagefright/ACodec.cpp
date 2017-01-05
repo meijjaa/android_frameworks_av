@@ -1696,6 +1696,10 @@ const char *ACodec::getComponentRole(
             "video_decoder.mjpeg", "video_encoder.mjpeg" },
         { MEDIA_MIMETYPE_VIDEO_WMV3,
             "video_decoder.wmv3", "video_encoder.wmv3" },
+        { MEDIA_MIMETYPE_AUDIO_WMA,
+            "audio_decoder.wma", "audio_encoder.wma" },
+        { MEDIA_MIMETYPE_AUDIO_WMAPRO,
+            "audio_decoder.wmapro", "audio_encoder.wmapro" },
         { MEDIA_MIMETYPE_VIDEO_VC1,
             "video_decoder.vc1", "video_encoder.vc1" },
         { MEDIA_MIMETYPE_VIDEO_WVC1,
@@ -2315,7 +2319,21 @@ status_t ACodec::configureCodec(
     }
 //add by amlogic for dts audio support
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
-    else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_DTSHD)) {
+     else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_WMA) ||
+               !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_WMAPRO)) {
+            int32_t sample_rate,channels,bit_rate,codec_id,extradata_size,block_align;
+            CHECK(msg->findInt32("sample-rate",&sample_rate));
+            CHECK(msg->findInt32("channel-count",&channels));
+            CHECK(msg->findInt32("bitrate",&bit_rate));
+            CHECK(msg->findInt32("codec-id",&codec_id));
+            CHECK(msg->findInt32("extradata-size",&extradata_size));
+            CHECK(msg->findInt32("block-align",&block_align));
+            sp<ABuffer> buffer = new (std::nothrow) ABuffer(extradata_size);
+            CHECK(msg->findBuffer("extra-data",&buffer));
+            ALOGI("mMIME  %s \n",  mime);
+            err = setupWMACodec(sample_rate, channels, bit_rate,codec_id,block_align,(char*)buffer->data(),extradata_size);;
+
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_DTSHD)) {
         int32_t numChannels;
         int32_t sampleRate;
         if (!msg->findInt32("channel-count", &numChannels)
@@ -2980,6 +2998,33 @@ status_t ACodec::setupDTSCodec(
             &def,
             sizeof(def));
 }
+status_t ACodec::setupWMACodec(int32_t sampleRate, int32_t numChannels , int32_t bitRate,
+                                     int32_t codec_id,  int32_t block_align,char* extradata,int32_t extradata_size){
+         OMX_AUDIO_PARAM_ASFTYPE wma_info;
+      status_t err;
+      InitOMXParams(&wma_info);
+      wma_info.nPortIndex = kPortIndexInput;
+      ALOGI("wma codec id %x\n",codec_id);
+
+      wma_info.nChannels      = numChannels;
+      wma_info.nSamplesPerSec = sampleRate;
+      wma_info.wFormatTag     = codec_id & 0xffff; /*only 16 bit formatTag*/
+      wma_info.nAvgBitratePerSec= bitRate;
+      wma_info.nBlockAlign    = block_align;
+      wma_info.extradata_size = extradata_size;
+      if (extradata_size > 128) {
+          ALOGE("extradata_size:%d > 128 byte",extradata_size);
+          return ERROR_UNSUPPORTED;
+      }
+      memcpy((char *)wma_info.extradata,extradata,extradata_size);
+      err = mOMX->setParameter(mNode, OMX_IndexParamAudioWma, &wma_info, sizeof(wma_info));
+      if (err != OK) {
+          ALOGI("setParameter('OMX_IndexParamAudioWma') failed (err = %d)", err);
+          return err;
+      }
+      return OK;
+}
+
 #endif
 static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(
         bool isAMRWB, int32_t bps) {
@@ -5479,6 +5524,22 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                     notify->setString("mime", MEDIA_MIMETYPE_AUDIO_DTSHD);
                     notify->setInt32("channel-count", params.nChannels);
                     notify->setInt32("sample-rate", params.nSamplesPerSec);
+                    break;
+                }
+                case OMX_AUDIO_CodingWMA:
+                {
+                    OMX_AUDIO_PARAM_AACPROFILETYPE params;
+                    InitOMXParams(&params);
+                    params.nPortIndex = portIndex;
+                    err = mOMX->getParameter(
+                            mNode, OMX_IndexParamAudioWma, &params, sizeof(params));
+                    if (err != OK) {
+                        return err;
+                    }
+
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_WMA);
+                    notify->setInt32("channel-count", params.nChannels);
+                    notify->setInt32("sample-rate", params.nSampleRate);
                     break;
                 }
 #endif

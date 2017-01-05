@@ -611,9 +611,21 @@ status_t convertMetaDataToMessage(
     msg->setString("mime", mime);
 
     int64_t durationUs;
+
     if (meta->findInt64(kKeyDuration, &durationUs)) {
         msg->setInt64("durationUs", durationUs);
     }
+
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+    int32_t codec_id,block_align;
+    if (meta->findInt32(kKeyCodecID, &codec_id)) {
+        msg->setInt32("codec-id", codec_id);
+    }
+
+    if (meta->findInt32(kKeyBlockAlign, &block_align)) {
+        msg->setInt32("block-align", block_align);
+    }
+#endif
 
     int32_t avgBitRate = 0;
     if (meta->findInt32(kKeyBitRate, &avgBitRate) && avgBitRate > 0) {
@@ -704,7 +716,25 @@ status_t convertMetaDataToMessage(
                 || !meta->findInt32(kKeySampleRate, &sampleRate)) {
             return BAD_VALUE;
         }
-
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+        uint32_t type;
+        size_t size;
+        const void *extradata;
+        int32_t extradata_size;
+        if (meta->findData(kKeyExtraData, &type, &extradata, &size)
+                && meta->findInt32(kKeyExtraDataSize,&extradata_size)) {
+            msg->setInt32("extradata-size", extradata_size);
+            const uint8_t *ptr = (const uint8_t *)extradata;
+            sp<ABuffer> buffer = new (std::nothrow) ABuffer(1024);
+            if (buffer.get() == NULL || buffer->base() == NULL) {
+                return NO_MEMORY;
+            }
+            buffer->setRange(0, 0);
+            memcpy(buffer->data(), ptr, extradata_size);
+            buffer->setRange(buffer->offset(), extradata_size);
+            msg->setBuffer("extra-data", buffer);
+        }
+#endif
         msg->setInt32("channel-count", numChannels);
         msg->setInt32("sample-rate", sampleRate);
 
