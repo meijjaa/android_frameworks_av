@@ -454,7 +454,7 @@ bool NuPlayer::CCDecoder::parseDTVCCPacket(int64_t timeUs, const uint8_t *data, 
         }
 
         if (block_size > 0) {
-            size_t trackIndex = getTrackIndex(kTrackTypeCEA708, service_number, &trackAdded);
+            //size_t trackIndex = getTrackIndex(kTrackTypeCEA708, service_number, &trackAdded);
             //if (mSelectedTrack == (ssize_t)trackIndex) {// wxl shield for 7.0 cts android.media.cts.MediaPlayerTest#testChangeSubtitleTrack 20161201
                 sp<ABuffer> ccPacket = new ABuffer(block_size);
                 memcpy(ccPacket->data(), br.data(), block_size);
