@@ -62,6 +62,7 @@ static const struct {
     { "OMX.google.mp2.decoder", "mp2dec", "audio_decoder.mp2" },
     { "OMX.google.wma.decoder", "wmadec", "audio_decoder.wma" },
     { "OMX.google.wmapro.decoder", "wmaprodec", "audio_decoder.wmapro" },
+    { "OMX.google.truehd.decoder", "truehddec", "audio_decoder.truehd" },
 #endif
     { "OMX.google.vp8.decoder", "vpxdec", "video_decoder.vp8" },
     { "OMX.google.h264.encoder", "avcenc", "video_encoder.avc" },

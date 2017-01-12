@@ -1700,6 +1700,8 @@ const char *ACodec::getComponentRole(
             "audio_decoder.wma", "audio_encoder.wma" },
         { MEDIA_MIMETYPE_AUDIO_WMAPRO,
             "audio_decoder.wmapro", "audio_encoder.wmapro" },
+        { MEDIA_MIMETYPE_AUDIO_TRUEHD,
+            "audio_decoder.truehd", "audio_encoder.truehd" },
         { MEDIA_MIMETYPE_VIDEO_VC1,
             "video_decoder.vc1", "video_encoder.vc1" },
         { MEDIA_MIMETYPE_VIDEO_WVC1,
@@ -2343,6 +2345,17 @@ status_t ACodec::configureCodec(
         } else {
 
             err = setupDTSCodec(encoder, numChannels, sampleRate);
+        }
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_TRUEHD)) {
+        int32_t numChannels;
+        int32_t sampleRate;
+        if (!msg->findInt32("channel-count", &numChannels)
+                || !msg->findInt32("sample-rate", &sampleRate)) {
+            ALOGE("TRUEHD has invalid parameters!");
+            err = INVALID_OPERATION;
+        } else {
+
+            err = setupTRUEHDCodec(encoder, numChannels, sampleRate);
         }
     }
 #endif
@@ -2998,6 +3011,44 @@ status_t ACodec::setupDTSCodec(
             &def,
             sizeof(def));
 }
+
+status_t ACodec::setupTRUEHDCodec(
+        bool encoder, int32_t numChannels, int32_t sampleRate) {
+    status_t err = setupRawAudioFormat(
+            encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
+
+    if (err != OK) {
+        return err;
+    }
+    if (encoder) {
+        ALOGW("truehd encoding is not supported.");
+        return INVALID_OPERATION;
+    }
+
+    OMX_AUDIO_PARAM__ANDROID_TRUEHDTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexInput;
+
+    err = mOMX->getParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidTruehd,
+            &def,
+            sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.nChannels = numChannels;
+    def.nSamplesPerSec = sampleRate;
+    def.bExtendFormat = (OMX_BOOL)0;
+    return mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidTruehd,
+            &def,
+            sizeof(def));
+}
+
 status_t ACodec::setupWMACodec(int32_t sampleRate, int32_t numChannels , int32_t bitRate,
                                      int32_t codec_id,  int32_t block_align,char* extradata,int32_t extradata_size){
          OMX_AUDIO_PARAM_ASFTYPE wma_info;
@@ -5533,6 +5584,22 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                     params.nPortIndex = portIndex;
                     err = mOMX->getParameter(
                             mNode, OMX_IndexParamAudioWma, &params, sizeof(params));
+                    if (err != OK) {
+                        return err;
+                    }
+
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_WMA);
+                    notify->setInt32("channel-count", params.nChannels);
+                    notify->setInt32("sample-rate", params.nSampleRate);
+                    break;
+                }
+               case OMX_AUDIO_CodingAndroidTRUEHD:
+                {
+                    OMX_AUDIO_PARAM_AACPROFILETYPE params;
+                    InitOMXParams(&params);
+                    params.nPortIndex = portIndex;
+                    err = mOMX->getParameter(
+                            mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidTruehd, &params, sizeof(params));
                     if (err != OK) {
                         return err;
                     }
