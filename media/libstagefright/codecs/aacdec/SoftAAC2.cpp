@@ -1034,6 +1034,12 @@ void SoftAAC2::onQueueFilled(OMX_U32 /* portIndex */) {
             if (mEndOfInput && !outQueue.empty() && outputDelayRingBufferSamplesAvailable() == 0) {
                 outHeader->nFlags = OMX_BUFFERFLAG_EOS;
                 mEndOfOutput = true;
+                char value[PROPERTY_VALUE_MAX];
+                int delaytime = 200000;
+                if (property_get("media.aac.eosdelay", value, NULL) > 0)
+                    sscanf(value, "%d", &delaytime);
+                usleep(delaytime);
+                ALOGE("...EOS Delay Time %d us\n", delaytime);
             } else {
                 outHeader->nFlags = 0;
             }
