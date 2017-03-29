@@ -708,6 +708,11 @@ status_t convertMetaDataToMessage(
             buffer->setRange(buffer->offset(), extradata_size);
             msg->setBuffer("extra-data", buffer);
         }
+
+        int32_t isMVC;
+        if (meta->findInt32(kKeyIsMVC, &isMVC)) {
+            msg->setInt32("is-mvc", isMVC);
+        }
 #endif
         convertMetaDataToMessageColorAspects(meta, msg);
     } else if (!strncasecmp("audio/", mime, 6)) {

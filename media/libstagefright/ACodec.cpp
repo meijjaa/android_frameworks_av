@@ -1804,6 +1804,18 @@ status_t ACodec::configureCodec(
                 &enable, sizeof(enable));
     }
 
+    int32_t isMVC = 0;
+    if (!encoder && !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_AVC)
+            && msg->findInt32("is-mvc", &isMVC)) {
+        OMX_INDEXTYPE index;
+        if (mOMX->getExtensionIndex(mNode,"OMX.amlogic.index.isMvc", &index) == OK) {
+            OMX_VIDEO_PARAM_IS_MVC params;
+            InitOMXParams(&params);
+            params.bIsMVC = (OMX_BOOL)isMVC;
+            mOMX->setParameter(mNode, index, &params, sizeof(params));
+        }
+    }
+
     int32_t bitRate = 0;
     // FLAC encoder doesn't need a bitrate, other encoders do
     if (encoder && strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)

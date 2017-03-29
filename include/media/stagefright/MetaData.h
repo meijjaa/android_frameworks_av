@@ -212,6 +212,7 @@ enum {
 
     //amffmpeg extended types
     kKeyProgramName       = 'proN', // cstring
+    kKeyIsMVC             = 'mvc ', // bool (int32_t)
 
     kKeyBlockAlign        = 'bagn',
     kKeyAudioFlag         ='aufg',  // audio info reported from decoder to indicate special info
