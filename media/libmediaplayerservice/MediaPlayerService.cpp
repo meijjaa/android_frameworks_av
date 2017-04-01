@@ -632,7 +632,7 @@ MediaPlayerService::Client::~Client()
         mQuitCondition.wait(mQuitMutex);
     }
     ALOGV("Client(%d) destructor pid = %d", mConnId, mPid);
-    mAudioOutput.clear();
+    //mAudioOutput.clear();
     wp<Client> client(this);
     disconnect();
     mService->removeClient(client);
@@ -672,6 +672,7 @@ void MediaPlayerService::Client::disconnect()
     //mNotifyClient = NULL;
 
     disconnectNativeWindow();
+    mAudioOutput.clear();
 
     IPCThreadState::self()->flushCommands();
 }
