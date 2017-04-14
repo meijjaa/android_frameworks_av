@@ -713,6 +713,11 @@ status_t convertMetaDataToMessage(
         if (meta->findInt32(kKeyIsMVC, &isMVC)) {
             msg->setInt32("is-mvc", isMVC);
         }
+
+        int32_t is4kOSD = 0;
+        if (meta->findInt32(kKey4kOSD, &is4kOSD)) {
+            msg->setInt32("4k-osd", is4kOSD);
+        }
 #endif
         convertMetaDataToMessageColorAspects(meta, msg);
     } else if (!strncasecmp("audio/", mime, 6)) {

@@ -1798,10 +1798,12 @@ status_t ACodec::configureCodec(
     mLowLatencyMode = low_latency_mode;
     int32_t Is4k_osd = 0;
     if (msg->findInt32("4k-osd", &Is4k_osd)) {
-        OMX_BOOL enable = (OMX_BOOL)Is4k_osd;
+        OMX_CONFIG_BOOLEANTYPE  def;
+        InitOMXParams(&def);
+        def.bEnabled = (OMX_BOOL)Is4k_osd;
         err = mOMX->setParameter(
             mNode, static_cast<OMX_INDEXTYPE>(OMX_IndexParam4kosd),
-                &enable, sizeof(enable));
+            &def, sizeof(def));
     }
 
     int32_t isMVC = 0;
