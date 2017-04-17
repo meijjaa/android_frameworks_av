@@ -2317,20 +2317,28 @@ status_t ACodec::configureCodec(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AC3)) {
         int32_t numChannels;
         int32_t sampleRate;
+        int32_t audio_extendformat = 0 ;
+        if (!msg->findInt32("audio_extendformat", &audio_extendformat))
+           audio_extendformat = 0;
+        ALOGI("audio_extendformat:%d",audio_extendformat);
         if (!msg->findInt32("channel-count", &numChannels)
                 || !msg->findInt32("sample-rate", &sampleRate)) {
             err = INVALID_OPERATION;
         } else {
-            err = setupAC3Codec(encoder, numChannels, sampleRate);
+            err = setupAC3Codec(encoder, numChannels, sampleRate,audio_extendformat);
         }
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_EAC3)) {
         int32_t numChannels;
         int32_t sampleRate;
+        int32_t audio_extendformat = 0 ;
+        if (!msg->findInt32("audio_extendformat", &audio_extendformat))
+           audio_extendformat = 0;
+        ALOGI("audio_extendformat:%d",audio_extendformat);
         if (!msg->findInt32("channel-count", &numChannels)
                 || !msg->findInt32("sample-rate", &sampleRate)) {
             err = INVALID_OPERATION;
         } else {
-            err = setupEAC3Codec(encoder, numChannels, sampleRate);
+            err = setupEAC3Codec(encoder, numChannels, sampleRate, audio_extendformat);
         }
     }
 //add by amlogic for dts audio support
@@ -2352,24 +2360,34 @@ status_t ACodec::configureCodec(
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_DTSHD)) {
         int32_t numChannels;
         int32_t sampleRate;
+        int32_t audio_extendformat = 0 ;
+        if (!msg->findInt32("audio_extendformat", &audio_extendformat))
+           audio_extendformat = 0;
+
+        ALOGI("audio_extendformat:%d",audio_extendformat);
         if (!msg->findInt32("channel-count", &numChannels)
                 || !msg->findInt32("sample-rate", &sampleRate)) {
             ALOGE("DTS has invalid parameters!");
             err = INVALID_OPERATION;
         } else {
 
-            err = setupDTSCodec(encoder, numChannels, sampleRate);
+            err = setupDTSCodec(encoder, numChannels, sampleRate, audio_extendformat);
         }
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_TRUEHD)) {
         int32_t numChannels;
         int32_t sampleRate;
+        int32_t audio_extendformat = 0 ;
+        if (!msg->findInt32("audio_extendformat", &audio_extendformat))
+           audio_extendformat = 0;
+
+        ALOGI("audio_extendformat:%d",audio_extendformat);
         if (!msg->findInt32("channel-count", &numChannels)
                 || !msg->findInt32("sample-rate", &sampleRate)) {
             ALOGE("TRUEHD has invalid parameters!");
             err = INVALID_OPERATION;
         } else {
 
-            err = setupTRUEHDCodec(encoder, numChannels, sampleRate);
+            err = setupTRUEHDCodec(encoder, numChannels, sampleRate, audio_extendformat);
         }
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FFMPEG)) {
          int32_t sampleRate, numChannels, extradataSize, bitRate, blockAlign, codecId;
@@ -2930,7 +2948,7 @@ status_t ACodec::setupAACCodec(
 }
 
 status_t ACodec::setupAC3Codec(
-        bool encoder, int32_t numChannels, int32_t sampleRate) {
+        bool encoder, int32_t numChannels, int32_t sampleRate ,int32_t audio_extendformat) {
     status_t err = setupRawAudioFormat(
             encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
 
@@ -2942,7 +2960,22 @@ status_t ACodec::setupAC3Codec(
         ALOGW("AC3 encoding is not supported.");
         return INVALID_OPERATION;
     }
+    OMX_AUDIO_PARAM_DOLBYAUDIOTYPE dolbyinfo;
 
+    InitOMXParams(&dolbyinfo);
+    dolbyinfo.nPortIndex = kPortIndexInput;
+    dolbyinfo.bExtendFormat = (OMX_BOOL)audio_extendformat;
+    dolbyinfo.nAudioCodec= 1;
+
+    err = mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioDolbyAudio,
+            &dolbyinfo,
+            sizeof(dolbyinfo));
+
+    if (err != OK) {
+        return err;
+    }
     OMX_AUDIO_PARAM_ANDROID_AC3TYPE def;
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexInput;
@@ -2968,7 +3001,7 @@ status_t ACodec::setupAC3Codec(
 }
 
 status_t ACodec::setupEAC3Codec(
-        bool encoder, int32_t numChannels, int32_t sampleRate) {
+        bool encoder, int32_t numChannels, int32_t sampleRate, int32_t audio_extendformat) {
     status_t err = setupRawAudioFormat(
             encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
 
@@ -2980,7 +3013,21 @@ status_t ACodec::setupEAC3Codec(
         ALOGW("EAC3 encoding is not supported.");
         return INVALID_OPERATION;
     }
+    OMX_AUDIO_PARAM_DOLBYAUDIOTYPE dolbyinfo;
 
+    InitOMXParams(&dolbyinfo);
+    dolbyinfo.nPortIndex = kPortIndexInput;
+    dolbyinfo.bExtendFormat= (OMX_BOOL)audio_extendformat;
+    dolbyinfo.nAudioCodec= 2;
+    err = mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioDolbyAudio,
+            &dolbyinfo,
+            sizeof(dolbyinfo));
+
+    if (err != OK) {
+        return err;
+    }
     OMX_AUDIO_PARAM_ANDROID_EAC3TYPE def;
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexInput;
@@ -3008,7 +3055,7 @@ status_t ACodec::setupEAC3Codec(
 //add by amlogic for dts audio support
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
 status_t ACodec::setupDTSCodec(
-        bool encoder, int32_t numChannels, int32_t sampleRate) {
+        bool encoder, int32_t numChannels, int32_t sampleRate ,int32_t audio_extendformat) {
     status_t err = setupRawAudioFormat(
             encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
 
@@ -3021,6 +3068,7 @@ status_t ACodec::setupDTSCodec(
     }
 
     OMX_AUDIO_PARAM_ANDROID_DTSHDTYPE def;
+
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexInput;
 
@@ -3036,7 +3084,8 @@ status_t ACodec::setupDTSCodec(
 
     def.nChannels = numChannels;
     def.nSamplesPerSec = sampleRate;
-    def.bExtendFormat = (OMX_BOOL)0;
+    def.bExtendFormat= (OMX_BOOL)audio_extendformat;
+
     return mOMX->setParameter(
             mNode,
             (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidDtshd,
@@ -3045,7 +3094,7 @@ status_t ACodec::setupDTSCodec(
 }
 
 status_t ACodec::setupTRUEHDCodec(
-        bool encoder, int32_t numChannels, int32_t sampleRate) {
+        bool encoder, int32_t numChannels, int32_t sampleRate ,int32_t audio_extendformat) {
     status_t err = setupRawAudioFormat(
             encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
 
@@ -3058,6 +3107,7 @@ status_t ACodec::setupTRUEHDCodec(
     }
 
     OMX_AUDIO_PARAM__ANDROID_TRUEHDTYPE def;
+
     InitOMXParams(&def);
     def.nPortIndex = kPortIndexInput;
 
@@ -3073,7 +3123,7 @@ status_t ACodec::setupTRUEHDCodec(
 
     def.nChannels = numChannels;
     def.nSamplesPerSec = sampleRate;
-    def.bExtendFormat = (OMX_BOOL)0;
+    def.bExtendFormat= (OMX_BOOL)audio_extendformat;
     return mOMX->setParameter(
             mNode,
             (OMX_INDEXTYPE)OMX_IndexParamAudioAndroidTruehd,

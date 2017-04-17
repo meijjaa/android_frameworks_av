@@ -464,13 +464,13 @@ private:
             int32_t maxOutputChannelCount, const drcParams_t& drc,
             int32_t pcmLimiterEnable);
 
-    status_t setupAC3Codec(bool encoder, int32_t numChannels, int32_t sampleRate);
+    status_t setupAC3Codec(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t audio_extendformat);
 
-    status_t setupEAC3Codec(bool encoder, int32_t numChannels, int32_t sampleRate);
+    status_t setupEAC3Codec(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t audio_extendformat);
 //add by amlogic for dts audio support
-    status_t setupDTSCodec(bool encoder, int32_t numChannels, int32_t sampleRate);
+    status_t setupDTSCodec(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t audio_extendformat);
 //add by amlogic for truehd audio support
-    status_t setupTRUEHDCodec(bool encoder, int32_t numChannels, int32_t sampleRate);
+    status_t setupTRUEHDCodec(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t audio_extendformat);
 //add by amlogic for wma audio support
     status_t setupWMACodec(int32_t sampleRate, int32_t numChannels , int32_t bitRate,
                                      int32_t codec_id,  int32_t block_align,char* extradata,int32_t extradata_size);
