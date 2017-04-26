@@ -498,6 +498,13 @@ audio_devices_t Engine::getDeviceForStrategyInt(routing_strategy strategy,
         if (device2 == AUDIO_DEVICE_NONE) {
             device2 = availableOutputDevicesType & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET;
         }
+        //changed by amlogic for spdif/hdmi-arc audio output
+        if ((device2 == AUDIO_DEVICE_NONE) && (strategy != STRATEGY_SONIFICATION)) {
+            device2 = availableOutputDevicesType & AUDIO_DEVICE_OUT_HDMI_ARC;
+        }
+        if ((device2 == AUDIO_DEVICE_NONE) && (strategy != STRATEGY_SONIFICATION)) {
+            device2 = availableOutputDevicesType & AUDIO_DEVICE_OUT_SPDIF;
+        }
         if ((device2 == AUDIO_DEVICE_NONE) && (strategy != STRATEGY_SONIFICATION)) {
             // no sonification on aux digital (e.g. HDMI)
             device2 = availableOutputDevicesType & AUDIO_DEVICE_OUT_AUX_DIGITAL;
@@ -512,9 +519,11 @@ audio_devices_t Engine::getDeviceForStrategyInt(routing_strategy strategy,
         int device3 = AUDIO_DEVICE_NONE;
         if (strategy == STRATEGY_MEDIA) {
             // ARC, SPDIF and AUX_LINE can co-exist with others.
-            device3 = availableOutputDevicesType & AUDIO_DEVICE_OUT_HDMI_ARC;
-            device3 |= (availableOutputDevicesType & AUDIO_DEVICE_OUT_SPDIF);
-            device3 |= (availableOutputDevicesType & AUDIO_DEVICE_OUT_AUX_LINE);
+            //modified by amlogic,if HDMI ARC/SPDIF are co-exist with  AUDIO_DEVICE_OUT_AUX_DIGITAL
+            //we can not return two devices for output at the same.we need a priority also.
+            //device3 = availableOutputDevicesType & AUDIO_DEVICE_OUT_HDMI_ARC;
+            //device3 |= (availableOutputDevicesType & AUDIO_DEVICE_OUT_SPDIF);
+            //device3 |= (availableOutputDevicesType & AUDIO_DEVICE_OUT_AUX_LINE);
         }
 
         device2 |= device3;
