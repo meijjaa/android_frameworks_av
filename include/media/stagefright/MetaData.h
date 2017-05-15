@@ -212,6 +212,7 @@ enum {
 
     //amffmpeg extended types
     kKeyProgramName       = 'proN', // cstring
+    kKeyProgramNum        = 'PrgN', // int32_t
     kKeyIsMVC             = 'mvc ', // bool (int32_t)
     kKey4kOSD             = '4OSD', // bool (int32_t)
 
