@@ -520,7 +520,14 @@ sp<MetaData> MakeAACCodecSpecificData(
         unsigned profile, unsigned sampling_freq_index,
         unsigned channel_configuration) {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
+    //google aac decoder can not decode Main profile(0) AAC audio
+    //so use the amlogic adts decoder
+    if (profile != 0) {
+        meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
+    }
+    else {
+        meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE);
+    }
 
     CHECK_LE(sampling_freq_index, 11u);
     static const int32_t kSamplingFreq[] = {

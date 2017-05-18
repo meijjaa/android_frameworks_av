@@ -1726,6 +1726,8 @@ const char *ACodec::getComponentRole(
             "video_decoder.wmv1", "video_encoder.wmv1"},
        { MEDIA_MIMETYPE_AUDIO_FFMPEG,
             "audio_decoder.ffmpeg", "audio_encoder.ffmpeg" },
+       { MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE,
+            "audio_decoder.adts", "audio_encoder.adts" },
 #endif
     };
 
@@ -2204,6 +2206,7 @@ status_t ACodec::configureCodec(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)
 #ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
         || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADIF)
+        || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE)
 #endif
     ) {
         int32_t numChannels, sampleRate;
@@ -2806,6 +2809,7 @@ status_t ACodec::setupAACCodec(
         int32_t bitRate, int32_t aacProfile, bool isADTS, int32_t sbrMode,
         int32_t maxOutputChannelCount, const drcParams_t& drc,
         int32_t pcmLimiterEnable) {
+
     if (encoder && isADTS) {
         return -EINVAL;
     }
