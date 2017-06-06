@@ -699,7 +699,7 @@ status_t convertMetaDataToMessage(
                 && meta->findInt32(kKeyExtraDataSize,&extradata_size)) {
             msg->setInt32("extradata-size", extradata_size);
             const uint8_t *ptr = (const uint8_t *)extradata;
-            sp<ABuffer> buffer = new (std::nothrow) ABuffer(1024);
+            sp<ABuffer> buffer = new (std::nothrow) ABuffer(extradata_size);
             if (buffer.get() == NULL || buffer->base() == NULL) {
                 return NO_MEMORY;
             }
