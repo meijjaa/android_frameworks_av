@@ -54,6 +54,8 @@ enum {
     INFO_DISCONTINUITY     = MEDIA_ERROR_BASE - 13,
     INFO_OUTPUT_BUFFERS_CHANGED = MEDIA_ERROR_BASE - 14,
 
+    ERROR_READ_TIME_OUT = MEDIA_ERROR_BASE - 15,//read avpacket time out, should read again
+
     // The following constant values should be in sync with
     // drm/drm_framework_common.h
     DRM_ERROR_BASE = -2000,
