@@ -2314,6 +2314,8 @@ void MediaCodec::extractCSD(const sp<AMessage> &format) {
 status_t MediaCodec::queueCSDInputBuffer(size_t bufferIndex) {
     CHECK(!mCSD.empty());
 
+    size_t setsize = 0;
+
     const BufferInfo *info =
         &mPortBuffers[kPortIndexInput].itemAt(bufferIndex);
 
@@ -2326,15 +2328,24 @@ status_t MediaCodec::queueCSDInputBuffer(size_t bufferIndex) {
     if (csd->size() > codecInputData->capacity()) {
         return -EINVAL;
     }
-
-    memcpy(codecInputData->data(), csd->data(), csd->size());
-
+    setsize = csd->size();
+    /*get real extradata from csd for SMPTE 421M-2006 Annex-L change*/
+    if (mIsVideo && mComponentName.startsWith("OMX.amlogic.mswmv3.")) {
+        static char annexL_hdr1[] = {0x8e, 0x01, 0x00, 0xc5, 0x04, 0x00, 0x00, 0x00};
+        static char annexL_hdr2[] = {0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	if (!memcmp(annexL_hdr1, csd->data(),8) && !memcmp(annexL_hdr2, csd->data()+20,16)) {
+        memcpy(codecInputData->data(), csd->data()+8, 4);
+        setsize = 4;
+    } else
+        memcpy(codecInputData->data(), csd->data(), csd->size());
+    } else
+        memcpy(codecInputData->data(), csd->data(), csd->size());
     AString errorDetailMsg;
 
     sp<AMessage> msg = new AMessage(kWhatQueueInputBuffer, this);
     msg->setSize("index", bufferIndex);
     msg->setSize("offset", 0);
-    msg->setSize("size", csd->size());
+    msg->setSize("size", setsize);
     msg->setInt64("timeUs", 0ll);
     msg->setInt32("flags", BUFFER_FLAG_CODECCONFIG);
     msg->setPointer("errorDetailMsg", &errorDetailMsg);

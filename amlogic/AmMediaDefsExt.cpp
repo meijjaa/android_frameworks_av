@@ -42,6 +42,8 @@ const char *MEDIA_MIMETYPE_VIDEO_VP6A = "video/x-vnd.on2.vp6a";
 const char *MEDIA_MIMETYPE_VIDEO_WMV1 = "video/wmv1";
 const char *MEDIA_MIMETYPE_VIDEO_WMV2 = "video/wmv2";
 const char *MEDIA_MIMETYPE_VIDEO_WMV3 = "video/wmv3";
+const char *MEDIA_MIMETYPE_VIDEO_MSWMV3 = "video/x-ms-wmv";
+
 
 const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/dtshd";
 const char *MEDIA_MIMETYPE_AUDIO_MP1 = "audio/mp1";

@@ -43,6 +43,8 @@ extern const char *MEDIA_MIMETYPE_VIDEO_RM40;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV1;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV2;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV3;
+extern const char *MEDIA_MIMETYPE_VIDEO_MSWMV3;
+
 extern const char *MEDIA_MIMETYPE_VIDEO_VC1;
 extern const char *MEDIA_MIMETYPE_VIDEO_WVC1;
 
@@ -62,6 +64,9 @@ extern const char *MEDIA_MIMETYPE_AUDIO_DTSHD;
 extern const char *MEDIA_MIMETYPE_AUDIO_APE;
 extern const char *MEDIA_MIMETYPE_AUDIO_EC3;
 extern const char *MEDIA_MIMETYPE_AUDIO_TRUEHD;
+extern const char *MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE;
+
+
 extern const char *MEDIA_MIMETYPE_TEXT_TTML;
 
 extern const char *MEDIA_MIMETYPE_CONTAINER_ASF;

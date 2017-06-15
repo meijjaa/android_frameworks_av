@@ -28,6 +28,10 @@
 #include <media/stagefright/MetaData.h>
 #include <utils/misc.h>
 
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
+#include <media/stagefright/AmMediaDefsExt.h>
+#endif
+
 namespace android {
 
 unsigned parseUE(ABitReader *br) {
@@ -526,7 +530,9 @@ sp<MetaData> MakeAACCodecSpecificData(
         meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AAC);
     }
     else {
+#ifdef WITH_AMLOGIC_MEDIA_EX_SUPPORT
         meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_ADTS_PROFILE);
+#endif
     }
 
     CHECK_LE(sampling_freq_index, 11u);
