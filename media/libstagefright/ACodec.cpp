@@ -1791,13 +1791,19 @@ status_t ACodec::configureCodec(
 
     //add by amlogic for decoder low latency mode
     bool low_latency_mode = false;
-    if (mFlags & kFlagLowLatencyMode) {
+    int32_t lowlatencymode = false;
+    if (msg->findInt32("low-latency", &lowlatencymode) || (mFlags & kFlagLowLatencyMode) ) {
         low_latency_mode = true;
+
+        OMX_CONFIG_BOOLEANTYPE  def;
+        InitOMXParams(&def);
+        def.bEnabled = (OMX_BOOL)low_latency_mode;
         mOMX->setParameter(
                 mNode,
                 static_cast<OMX_INDEXTYPE>(OMX_IndexParamLowLatencyMode),
-                &low_latency_mode,
-                sizeof(low_latency_mode));
+                &def,
+                sizeof(def));
+        ALOGI(" mOMX->setParameter() OMX_IndexParamLowLatencyMode");
     }
     mLowLatencyMode = low_latency_mode;
     int32_t Is4k_osd = 0;
