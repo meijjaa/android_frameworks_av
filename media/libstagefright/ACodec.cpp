@@ -1828,6 +1828,22 @@ status_t ACodec::configureCodec(
         }
     }
 
+    int32_t profile;
+    if (!encoder && !strcasecmp(mime, MEDIA_MIMETYPE_VIDEO_HEVC)
+            && msg->findInt32("profile", &profile)) {
+        ALOGE("profile:%d", profile);
+        if (profile == OMX_VIDEO_HEVCProfileMain10HDR10
+            || profile == OMX_VIDEO_HEVCProfileMain10) {
+            OMX_INDEXTYPE index;
+            if (mOMX->getExtensionIndex(mNode,"OMX.amlogic.index.videoDisplay", &index) == OK) {
+                OMX_CONFIG_BOOLEANTYPE params;
+                InitOMXParams(&params);
+                params.bEnabled = OMX_TRUE;
+                mOMX->setParameter(mNode, index, &params, sizeof(params));
+            }
+        }
+    }
+
     int32_t bitRate = 0;
     // FLAC encoder doesn't need a bitrate, other encoders do
     if (encoder && strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)
