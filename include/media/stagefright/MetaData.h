@@ -215,6 +215,7 @@ enum {
     kKeyProgramNum        = 'PrgN', // int32_t
     kKeyIsMVC             = 'mvc ', // bool (int32_t)
     kKey4kOSD             = '4OSD', // bool (int32_t)
+    KKeyIsDV              = 'isDV', // bool (int32_t)
 
     kKeyBlockAlign        = 'bagn',
     kKeyAudioFlag         ='aufg',  // audio info reported from decoder to indicate special info
