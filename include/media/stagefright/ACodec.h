@@ -574,7 +574,7 @@ private:
 
     // Send EOS on input stream.
     void onSignalEndOfInputStream();
-
+	void configureCodec_amlogic_processVideoHwComposed(bool videoDecoder, sp<ANativeWindow> nativeWindow);
     DISALLOW_EVIL_CONSTRUCTORS(ACodec);
 };
 

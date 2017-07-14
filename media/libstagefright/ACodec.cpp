@@ -1986,7 +1986,9 @@ status_t ACodec::configureCodec(
         sp<ANativeWindow> nativeWindow =
             static_cast<ANativeWindow *>(static_cast<Surface *>(obj.get()));
 
-        // START of temporary support for automatic FRC - THIS WILL BE REMOVED
+        configureCodec_amlogic_processVideoHwComposed((video && !encoder), nativeWindow);
+
+        //START of temporary support for automatic FRC - THIS WILL BE REMOVED
         int32_t autoFrc;
         if (msg->findInt32("auto-frc", &autoFrc)) {
             bool enabled = autoFrc;

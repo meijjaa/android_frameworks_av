@@ -103,6 +103,8 @@ LOCAL_SHARED_LIBRARIES := \
         libz \
         libpowermanager
 
+LOCAL_SRC_FILES += ACodec_amlogic.cpp
+
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
         libyuv_static \
